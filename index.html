@@ -1,0 +1,1404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>2027 Commercial Events Planner</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Poppins:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap">
+<style>
+/* ============================================================
+   VOLT AFRICA — 2027 COMMERCIAL EVENTS PLANNER
+   Token system
+   Color: ink #141414, paper #faf9f7, red #C8102E (accent, spent once),
+          gold #E7A63C (tier2), pod-direct #2F6690, pod-inc #B5842B,
+          pod-digital #8F0B20, line #E4E1DA
+   Type: Fraunces (display), Poppins (UI/body), JetBrains Mono (data)
+   Layout: app-shell — left rail nav + sticky filter bar + content
+   ============================================================ */
+
+:root{
+  --ink:#141414;
+  --ink-soft:#3a3a3a;
+  --paper:#faf9f6;
+  --surface:#ffffff;
+  --line:#e4e1da;
+  --line-soft:#eeece7;
+  --muted:#7a7670;
+
+  --red:#c8102e;
+  --red-deep:#8f0b20;
+  --gold:#e7a63c;
+
+  --t1:#c8102e;
+  --t2:#c98a2b;
+  --t3:#3e6b8a;
+  --t4:#9b9690;
+
+  --pod-direct:#2f6690;
+  --pod-direct-bg:#e8eff4;
+  --pod-inc:#a8791f;
+  --pod-inc-bg:#f6efe0;
+  --pod-digital:#8f0b20;
+  --pod-digital-bg:#f7e6e6;
+
+  --shadow: 0 1px 2px rgba(20,20,20,.04), 0 6px 20px rgba(20,20,20,.05);
+}
+
+*,*::before,*::after{box-sizing:border-box;}
+html{-webkit-text-size-adjust:100%;}
+body{
+  margin:0;
+  background:var(--paper);
+  color:var(--ink);
+  font-family:'Poppins',Arial,sans-serif;
+  font-size:13px;
+  line-height:1.5;
+  -webkit-font-smoothing:antialiased;
+}
+::selection{background:var(--red); color:#fff;}
+h1,h2,h3,h4{font-family:'Fraunces',Georgia,serif; margin:0; text-wrap:balance;}
+a{color:inherit;}
+button{font-family:inherit;}
+.mono{font-family:'JetBrains Mono',ui-monospace,monospace; font-variant-numeric:tabular-nums;}
+
+/* ---------------- App shell ---------------- */
+.app{
+  display:grid;
+  grid-template-columns:232px minmax(0,1fr);
+  min-height:100vh;
+}
+@media (max-width:900px){
+  .app{grid-template-columns:1fr;}
+  .rail{position:static; height:auto; flex-direction:row; overflow-x:auto; padding:14px 12px;}
+  .rail-nav{flex-direction:row; gap:4px;}
+  .rail-brand{display:none;}
+  .rail-nav button{white-space:nowrap;}
+}
+
+/* ---------------- Left rail ---------------- */
+.rail{
+  background:var(--ink);
+  color:#fff;
+  position:sticky;
+  top:0;
+  height:100vh;
+  display:flex;
+  flex-direction:column;
+  padding:20px 14px;
+  overflow-y:auto;
+}
+.rail-brand{margin-bottom:22px;}
+.rail-brand .wordmark{
+  font-family:'Fraunces',serif; font-weight:600; font-size:18px; letter-spacing:-.01em; color:#fff;
+  line-height:1.15;
+}
+.rail-brand .wordmark em{color:var(--gold); font-style:normal;}
+.rail-brand .tag{
+  display:block; margin-top:6px; font-size:9.5px; letter-spacing:.12em; text-transform:uppercase;
+  color:#9a9a9a; font-weight:500;
+}
+.rail-nav{display:flex; flex-direction:column; gap:1px; flex:1;}
+.rail-nav button{
+  all:unset;
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  gap:9px;
+  padding:7px 9px;
+  border-radius:3px;
+  font-size:12px;
+  font-weight:500;
+  color:#c9c9c9;
+  transition:background .15s, color .15s;
+}
+.rail-nav button .idx{
+  font-family:'JetBrains Mono',monospace; font-size:9px; color:#77746e; width:15px; flex-shrink:0;
+}
+.rail-nav button:hover{background:rgba(255,255,255,.06); color:#fff;}
+.rail-nav button.active{background:var(--red); color:#fff;}
+.rail-nav button.active .idx{color:rgba(255,255,255,.7);}
+.rail-foot{font-size:9.5px; color:#77746e; padding-top:12px; border-top:1px solid rgba(255,255,255,.1); margin-top:10px; line-height:1.5;}
+
+/* ---------------- Main ---------------- */
+.main{min-width:0; max-width:100%; overflow-x:hidden;}
+.view{display:none; padding:22px 26px 56px; min-width:0; max-width:100%;}
+.view.active{display:block; animation:fadein .25s ease;}
+@keyframes fadein{from{opacity:0; transform:translateY(4px);} to{opacity:1; transform:none;}}
+@media (max-width:700px){ .view{padding:16px 14px 40px;} }
+
+.view-head{margin-bottom:16px; max-width:760px;}
+.eyebrow{
+  font-size:10px; font-weight:600; letter-spacing:.13em; text-transform:uppercase; color:var(--red);
+  margin-bottom:6px; display:block;
+}
+.view-head h1{font-size:clamp(20px,2.4vw,27px); font-weight:600; margin-bottom:6px;}
+.view-head p{color:var(--muted); font-size:12.5px; max-width:680px; margin:0;}
+
+/* ---------------- Overview hero ---------------- */
+.hero-north{
+  background:var(--ink); color:#fff; border-radius:6px; padding:20px 24px; margin-bottom:18px;
+  position:relative; overflow:hidden;
+}
+.hero-north::after{
+  content:""; position:absolute; right:-6%; top:-30%; width:46%; height:180%;
+  background:linear-gradient(135deg,var(--red),var(--red-deep)); clip-path:polygon(35% 0,100% 0,100% 100%,0 100%);
+  opacity:.92;
+}
+.hero-north .inner{position:relative; z-index:2; max-width:620px;}
+.hero-north .label{font-size:10px; font-weight:600; letter-spacing:.13em; text-transform:uppercase; color:var(--gold); margin-bottom:8px;}
+.hero-north h2{font-size:clamp(16px,1.9vw,21px); font-weight:600; line-height:1.28;}
+
+.stat-row{display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin-bottom:20px;}
+@media (max-width:700px){ .stat-row{grid-template-columns:repeat(2,1fr);} }
+.stat{background:var(--surface); border:1px solid var(--line); border-radius:5px; padding:12px 14px;}
+.stat .num{font-family:'JetBrains Mono',monospace; font-size:21px; font-weight:600; color:var(--ink);}
+.stat .lbl{font-size:10px; color:var(--muted); margin-top:3px; text-transform:uppercase; letter-spacing:.05em;}
+
+/* ---------------- Year rail (creative hook) ---------------- */
+.yearrail-wrap{margin-bottom:20px;}
+.yearrail-title{display:flex; align-items:baseline; justify-content:space-between; margin-bottom:8px;}
+.yearrail-title h3{font-size:14px; font-weight:600;}
+.yearrail-title span{font-size:10.5px; color:var(--muted);}
+.yearrail{
+  display:grid; grid-template-columns:repeat(12,1fr); gap:4px;
+  background:var(--surface); border:1px solid var(--line); border-radius:6px; padding:10px;
+}
+@media (max-width:700px){ .yearrail{grid-template-columns:repeat(6,1fr); grid-auto-rows:auto;} }
+.yr-month{
+  all:unset; cursor:pointer; display:flex; flex-direction:column; align-items:center; gap:6px;
+  padding:8px 3px 6px; border-radius:4px; transition:background .15s;
+}
+.yr-month:hover{background:var(--line-soft);}
+.yr-month .yr-bars{display:flex; align-items:flex-end; gap:2px; height:36px;}
+.yr-month .yr-bar{width:5px; border-radius:1px 1px 0 0; transition:height .3s ease;}
+.yr-month .yr-name{font-size:9px; font-weight:600; letter-spacing:.03em; color:var(--ink-soft); text-transform:uppercase;}
+.yr-month .yr-count{font-family:'JetBrains Mono',monospace; font-size:9px; color:var(--muted);}
+
+/* ---------------- Filter bar ---------------- */
+.filterbar{
+  display:flex; flex-wrap:wrap; gap:8px; align-items:center;
+  background:var(--surface); border:1px solid var(--line); border-radius:6px;
+  padding:9px 11px; margin-bottom:14px; position:sticky; top:0; z-index:5;
+}
+.filterbar .fgroup{display:flex; flex-direction:column; gap:2px;}
+.filterbar label{font-size:9px; font-weight:600; letter-spacing:.06em; text-transform:uppercase; color:var(--muted);}
+.filterbar select, .filterbar input[type=search]{
+  font-family:'Poppins',sans-serif; font-size:12px; padding:5px 8px; border-radius:4px;
+  border:1px solid var(--line); background:var(--paper); color:var(--ink); min-width:100px;
+}
+.filterbar select:focus, .filterbar input:focus{outline:2px solid var(--red); outline-offset:1px;}
+.filterbar .fgroup.grow{flex:1; min-width:160px;}
+.filterbar .fgroup.grow input{width:100%;}
+.filter-count{margin-left:auto; font-size:11px; color:var(--muted); font-family:'JetBrains Mono',monospace;}
+.chip-clear{
+  all:unset; cursor:pointer; font-size:10.5px; color:var(--red); font-weight:600; padding:5px 9px;
+  border:1px solid var(--red); border-radius:20px;
+}
+.chip-clear:hover{background:var(--red); color:#fff;}
+
+/* ---------------- Pills / badges ---------------- */
+.pill{
+  display:inline-flex; align-items:center; gap:4px; font-size:10px; font-weight:600;
+  padding:2px 8px; border-radius:20px; white-space:nowrap;
+}
+.pill-direct{background:var(--pod-direct-bg); color:var(--pod-direct);}
+.pill-inc{background:var(--pod-inc-bg); color:var(--pod-inc);}
+.pill-digital{background:var(--pod-digital-bg); color:var(--pod-digital);}
+.tier-badge{
+  display:inline-flex; align-items:center; gap:5px; font-size:9.5px; font-weight:700;
+  letter-spacing:.03em; text-transform:uppercase; padding:2px 8px; border-radius:3px; color:#fff;
+}
+
+/* ---------------- Cards / plan grid ---------------- */
+.month-group{margin-bottom:20px;}
+.month-group-head{
+  display:flex; align-items:baseline; gap:8px; margin-bottom:8px; padding-bottom:6px; border-bottom:2px solid var(--ink);
+}
+.month-group-head h3{font-size:16px; font-weight:600;}
+.month-group-head .count{font-size:10.5px; color:var(--muted); font-family:'JetBrains Mono',monospace;}
+
+.plan-grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:8px;}
+.plan-card{
+  background:var(--surface); border:1px solid var(--line); border-left:4px solid var(--pod-direct);
+  border-radius:4px; padding:12px 13px; box-shadow:var(--shadow);
+}
+.plan-card.pod-Direct{border-left-color:var(--pod-direct);}
+.plan-card.pod-INC{border-left-color:var(--pod-inc);}
+.plan-card.pod-Digital{border-left-color:var(--pod-digital);}
+.plan-card .pc-top{display:flex; justify-content:space-between; align-items:flex-start; gap:8px; margin-bottom:6px;}
+.plan-card h4{font-size:12.5px; font-weight:600; line-height:1.3; font-family:'Poppins',sans-serif;}
+.plan-card .pc-meta{display:flex; flex-wrap:wrap; gap:5px; margin:7px 0;}
+.plan-card .pc-row{font-size:11px; color:var(--ink-soft); margin-bottom:3px; display:flex; gap:5px;}
+.plan-card .pc-row .k{color:var(--muted); flex-shrink:0; min-width:74px;}
+.plan-card .pc-note{
+  margin-top:8px; padding-top:8px; border-top:1px dashed var(--line-soft);
+  font-size:10.5px; color:var(--muted); font-style:italic; line-height:1.45;
+}
+.empty-state{padding:30px; text-align:center; color:var(--muted); font-size:12.5px;}
+
+/* ---------------- Monthly Plan — campaign cards ---------------- */
+/* Groups every pod/month line item for one property (e.g. Cricket World Cup) into a
+   single card with its splits listed together, instead of scattering them by month. */
+.campaign-card{
+  background:var(--surface); border:1px solid var(--line); border-radius:6px;
+  padding:12px 14px 14px; margin-bottom:10px; box-shadow:var(--shadow);
+}
+.campaign-head{display:flex; justify-content:space-between; align-items:flex-start; gap:12px; margin-bottom:9px;}
+.campaign-head h3{font-size:15px; font-weight:600; font-family:'Fraunces',Georgia,serif;}
+.campaign-meta{font-size:10.5px; color:var(--muted); margin-top:3px;}
+.split-note-row td{border-bottom:1px solid var(--line-soft) !important;}
+.split-note{padding:0 10px 9px !important; font-size:10.5px; color:var(--muted); font-style:italic; line-height:1.45; border-bottom:1px solid var(--line-soft);}
+table.split-table td{padding:7px 10px;}
+
+/* ---------------- Tables ---------------- */
+.table-wrap{overflow-x:auto; max-width:100%; border:1px solid var(--line); border-radius:6px; background:var(--surface); -webkit-overflow-scrolling:touch;}
+table.datatable{width:100%; border-collapse:collapse; font-size:11.5px;}
+table.datatable th{
+  text-align:left; background:var(--ink); color:#fff; padding:7px 10px; font-size:9.5px;
+  font-weight:600; letter-spacing:.05em; text-transform:uppercase; white-space:nowrap;
+}
+table.datatable td{padding:8px 10px; border-bottom:1px solid var(--line-soft); vertical-align:top; overflow-wrap:break-word; word-break:normal;}
+table.datatable tbody tr:hover{background:var(--line-soft);}
+table.datatable tbody tr:last-child td{border-bottom:none;}
+
+/* ---------------- Accordion (opportunity matrix) ---------------- */
+.acc-item{border:1px solid var(--line); border-radius:6px; margin-bottom:8px; background:var(--surface); overflow:hidden;}
+.acc-head{
+  all:unset; box-sizing:border-box; width:100%; cursor:pointer; display:flex; justify-content:space-between; align-items:center;
+  padding:11px 14px; gap:12px;
+}
+.acc-head h4{font-size:12.5px; font-weight:600;}
+.acc-head .acc-sub{font-size:10.5px; color:var(--muted); margin-top:2px; font-weight:400;}
+.acc-head .chev{transition:transform .2s; color:var(--red); flex-shrink:0;}
+.acc-item.open .chev{transform:rotate(180deg);}
+.acc-body{max-height:0; overflow:hidden; transition:max-height .25s ease;}
+.acc-item.open .acc-body{max-height:900px;}
+.acc-body-inner{padding:0 14px 14px; display:grid; grid-template-columns:repeat(2,1fr); gap:10px;}
+@media (max-width:700px){ .acc-body-inner{grid-template-columns:1fr;} }
+.acc-field{font-size:11px;}
+.acc-field .fk{font-size:9px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--red); margin-bottom:4px; display:block;}
+.acc-field p{margin:0; color:var(--ink-soft); line-height:1.5;}
+
+/* ---------------- Client cards ---------------- */
+.client-grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(270px,1fr)); gap:10px;}
+.client-card{background:var(--surface); border:1px solid var(--line); border-radius:6px; padding:14px; box-shadow:var(--shadow);}
+.client-card .cc-top{display:flex; justify-content:space-between; align-items:flex-start; gap:8px; margin-bottom:5px;}
+.client-card h4{font-size:14px; font-weight:600;}
+.client-card .cc-cat{font-size:10px; color:var(--muted); margin-bottom:9px;}
+.status-dot{width:7px; height:7px; border-radius:50%; flex-shrink:0; margin-top:5px;}
+.status-dot.existing{background:#4a7a4a;}
+.status-dot.new{background:var(--gold);}
+.client-card .cc-field{margin-bottom:8px; font-size:11px;}
+.client-card .cc-field .k{font-size:9px; font-weight:700; letter-spacing:.05em; text-transform:uppercase; color:var(--muted); margin-bottom:2px; display:block;}
+.client-card .cc-field p{margin:0; color:var(--ink-soft); line-height:1.45;}
+.client-card .cc-pods{display:flex; gap:4px; margin-top:9px; flex-wrap:wrap;}
+
+/* ---------------- Pipeline gantt ---------------- */
+.gantt{background:var(--surface); border:1px solid var(--line); border-radius:6px; padding:14px; overflow-x:auto;}
+.gantt-months{display:grid; grid-template-columns:130px repeat(12,1fr); gap:0; margin-bottom:6px; min-width:640px;}
+.gantt-months .gm{font-size:9px; font-weight:600; text-align:center; color:var(--muted); text-transform:uppercase; padding-bottom:5px; border-bottom:1px solid var(--line);}
+.gantt-row{display:grid; grid-template-columns:130px repeat(12,1fr); align-items:center; gap:0; min-width:640px; padding:7px 0; border-bottom:1px solid var(--line-soft);}
+.gantt-row:last-child{border-bottom:none;}
+.gantt-label{font-size:11px; font-weight:600; padding-right:10px; line-height:1.3;}
+.gantt-label .status-tag{display:block; font-size:9px; font-weight:500; color:var(--muted); margin-top:2px; text-transform:none;}
+.gantt-track{position:relative; height:18px; grid-column:span 12; display:grid; grid-template-columns:repeat(12,1fr);}
+.gantt-cell{border-left:1px solid var(--line-soft);}
+.gantt-bar{
+  position:absolute; height:14px; top:2px; border-radius:3px; display:flex; align-items:center; padding:0 6px;
+  font-size:9px; color:#fff; font-weight:600; white-space:nowrap; overflow:hidden;
+}
+.gantt-dot{position:absolute; width:9px; height:9px; border-radius:50%; top:5px;}
+
+/* ---------------- Digital capacity ---------------- */
+.capacity-grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); gap:8px; margin-bottom:14px;}
+.cap-card{background:var(--surface); border:1px solid var(--line); border-radius:6px; padding:11px;}
+.cap-card.conflict{border-color:var(--red); box-shadow:0 0 0 1px var(--red);}
+.cap-card .cap-month{font-size:11.5px; font-weight:700; margin-bottom:7px; display:flex; justify-content:space-between; align-items:center;}
+.cap-slot{font-size:10px; padding:5px 7px; border-radius:4px; margin-bottom:5px; background:var(--paper); border:1px solid var(--line-soft);}
+.cap-slot .slot-k{font-size:8.5px; font-weight:700; letter-spacing:.05em; text-transform:uppercase; color:var(--muted); display:block; margin-bottom:2px;}
+.conflict-flag{font-size:9px; font-weight:700; color:#fff; background:var(--red); padding:2px 6px; border-radius:10px; text-transform:uppercase; letter-spacing:.03em;}
+
+.decision-box{
+  background:var(--ink); color:#fff; border-radius:6px; padding:16px 18px; margin-top:6px; position:relative; overflow:hidden;
+}
+.decision-box::before{content:""; position:absolute; left:0; top:0; bottom:0; width:5px; background:var(--red);}
+.decision-box .dtitle{font-size:10.5px; font-weight:700; letter-spacing:.07em; text-transform:uppercase; color:var(--gold); margin-bottom:8px;}
+.decision-box p{margin:0; font-size:11.5px; color:#ddd; line-height:1.6; max-width:760px;}
+
+/* ---------------- Scoring model (interactive sliders) ---------------- */
+.weights-panel{
+  display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:14px;
+  background:var(--surface); border:1px solid var(--line); border-radius:6px; padding:14px 16px; margin-bottom:16px;
+}
+.weight-ctrl label{font-size:9.5px; font-weight:600; text-transform:uppercase; letter-spacing:.04em; color:var(--ink-soft); display:flex; justify-content:space-between; margin-bottom:6px;}
+.weight-ctrl label .wval{font-family:'JetBrains Mono',monospace; color:var(--red); font-weight:700;}
+.weight-ctrl input[type=range]{width:100%; accent-color:var(--red);}
+.weight-total{grid-column:1/-1; font-size:10.5px; color:var(--muted); border-top:1px solid var(--line-soft); padding-top:10px; display:flex; justify-content:space-between; align-items:center;}
+.weight-total .wt-warn{color:var(--red); font-weight:600;}
+.reset-btn{
+  all:unset; cursor:pointer; font-size:10.5px; font-weight:600; color:var(--ink); border:1px solid var(--line);
+  padding:5px 11px; border-radius:20px;
+}
+.reset-btn:hover{border-color:var(--ink);}
+
+.score-list{display:flex; flex-direction:column; gap:6px;}
+.score-row{
+  display:grid; grid-template-columns:1fr 64px 170px; align-items:center; gap:12px;
+  background:var(--surface); border:1px solid var(--line); border-radius:5px; padding:9px 12px;
+  transition:order .3s;
+}
+@media (max-width:800px){ .score-row{grid-template-columns:1fr; gap:6px;} }
+.score-row .sr-name{font-size:12px; font-weight:600;}
+.score-row .sr-rationale{font-size:10.5px; color:var(--muted); margin-top:2px; font-weight:400; line-height:1.4;}
+.score-row .sr-score{font-family:'JetBrains Mono',monospace; font-size:16px; font-weight:700; text-align:right;}
+.score-bar-track{height:6px; background:var(--line-soft); border-radius:4px; overflow:hidden;}
+.score-bar-fill{height:100%; border-radius:4px; transition:width .4s ease, background .4s ease;}
+
+/* ---------------- misc ---------------- */
+.section-note{
+  font-size:11.5px; color:var(--muted); background:var(--surface); border:1px solid var(--line-soft);
+  border-radius:6px; padding:10px 14px; margin-bottom:14px; line-height:1.55;
+}
+.two-col{display:grid; grid-template-columns:1fr 1fr; gap:12px;}
+@media (max-width:700px){ .two-col{grid-template-columns:1fr;} }
+.legend-row{display:flex; flex-wrap:wrap; gap:12px; margin-bottom:14px; font-size:10.5px; color:var(--muted);}
+.legend-row .li{display:flex; align-items:center; gap:5px;}
+.legend-row .dot{width:8px; height:8px; border-radius:50%;}
+
+</style>
+</head>
+<body>
+
+<div class="app">
+  <nav class="rail">
+    <div class="rail-brand">
+      <div class="wordmark">Volt<em>.</em>Africa</div>
+      <span class="tag">2027 Commercial Planner</span>
+    </div>
+    <div class="rail-nav">
+      <button data-view="overview" class="active"><span class="idx">00</span>Overview</button>
+      <button data-view="monthly"><span class="idx">01</span>Monthly Plan</button>
+      <button data-view="calendar"><span class="idx">02</span>Calendar</button>
+      <button data-view="events"><span class="idx">03</span>Events</button>
+      <button data-view="opportunities"><span class="idx">04</span>Opportunities</button>
+      <button data-view="clients"><span class="idx">05</span>Clients</button>
+      <button data-view="pipeline"><span class="idx">06</span>Pipeline</button>
+      <button data-view="paidmedia"><span class="idx">07</span>Paid Media</button>
+      <button data-view="print"><span class="idx">08</span>Print</button>
+      <button data-view="capacity"><span class="idx">09</span>Digital Capacity</button>
+      <button data-view="leadtime"><span class="idx">10</span>Lead-Time</button>
+      <button data-view="scoring"><span class="idx">11</span>Scoring</button>
+    </div>
+    <div class="rail-foot">2027 SA events, fact-checked Sep 2026. Reconfirm dates marked TBC before client-facing use.</div>
+  </nav>
+
+  <main class="main">
+
+    <!-- 00 OVERVIEW -->
+    <section id="view-overview" class="view active">
+      <div class="hero-north">
+        <div class="inner">
+          <div class="label">North star</div>
+          <h2>Commercial opportunity first. Editorial builds what makes it sellable.</h2>
+        </div>
+      </div>
+
+      <div class="stat-row">
+        <div class="stat"><div class="num" id="stat-projects">—</div><div class="lbl">Sellable projects, 2027</div></div>
+        <div class="stat"><div class="num" id="stat-pods">—</div><div class="lbl">Sales pods</div></div>
+        <div class="stat"><div class="num" id="stat-clients">—</div><div class="lbl">Named accounts in play</div></div>
+        <div class="stat"><div class="num" id="stat-tier1">—</div><div class="lbl">Tier 1 anchor moments</div></div>
+      </div>
+
+      <div class="yearrail-wrap">
+        <div class="yearrail-title">
+          <h3>The year, at a glance</h3>
+          <span>Bar height = project volume · colour = pod · click a month to open its plan</span>
+        </div>
+        <div class="yearrail" id="yearrail"></div>
+      </div>
+
+      <div class="legend-row">
+        <span class="li"><span class="dot" style="background:var(--pod-direct)"></span>Direct — print-primary, light digital, Daily + Community titles</span>
+        <span class="li"><span class="dot" style="background:var(--pod-inc)"></span>INC — agency channel, print-primary, digital-secondary, Daily titles</span>
+        <span class="li"><span class="dot" style="background:var(--pod-digital)"></span>Digital — sells IOL primarily</span>
+      </div>
+
+      <div class="section-note">
+        Paid media (programmatic, social, search, retail media) is a cross-cutting layer any pod can attach to a deal — it has no dedicated owner today. See <strong>07 Paid Media</strong> for the product menu and <strong>09 Digital Capacity</strong> for how Cricket World Cup and Rugby World Cup — both confirmed priority hubs running the same Oct–Nov window — share IOL hub capacity.
+      </div>
+    </section>
+
+    <!-- 01 MONTHLY PLAN -->
+    <section id="view-monthly" class="view">
+      <div class="view-head">
+        <span class="eyebrow">01 · The working tab</span>
+        <h1>Sales Pod Monthly Plan</h1>
+        <p>Every property grouped together — e.g. all of Cricket World Cup's line items sit in one card, split out by pod and month — instead of scattered across separate months. Filter by month, pod or channel, or search for a client and property.</p>
+      </div>
+
+      <div class="filterbar">
+        <div class="fgroup">
+          <label for="mp-month">Month</label>
+          <select id="mp-month"><option value="all">All months</option></select>
+        </div>
+        <div class="fgroup">
+          <label for="mp-pod">Pod</label>
+          <select id="mp-pod">
+            <option value="all">All pods</option>
+            <option value="Direct">Direct</option>
+            <option value="INC">INC</option>
+            <option value="Digital">Digital</option>
+          </select>
+        </div>
+        <div class="fgroup">
+          <label for="mp-channel">Channel</label>
+          <select id="mp-channel">
+            <option value="all">All channels</option>
+            <option value="Print">Print</option>
+            <option value="Digital">Digital</option>
+            <option value="Paid Media">Paid Media</option>
+          </select>
+        </div>
+        <div class="fgroup grow">
+          <label for="mp-search">Search</label>
+          <input type="search" id="mp-search" placeholder="Client, property, title…">
+        </div>
+        <button class="chip-clear" id="mp-clear" type="button">Clear filters</button>
+        <span class="filter-count" id="mp-count"></span>
+      </div>
+
+      <div id="mp-results"></div>
+    </section>
+
+    <!-- 02 CALENDAR -->
+    <section id="view-calendar" class="view">
+      <div class="view-head">
+        <span class="eyebrow">02 · For management</span>
+        <h1>Executive Commercial Calendar</h1>
+        <p>One page: headline moment, hero client target and revenue tier, per month.</p>
+      </div>
+      <div class="table-wrap">
+        <table class="datatable">
+          <thead><tr><th>Month</th><th>Headline commercial moment(s)</th><th>Hero client target</th><th>Tier</th></tr></thead>
+          <tbody id="cal-tbody"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- 03 EVENTS -->
+    <section id="view-events" class="view">
+      <div class="view-head">
+        <span class="eyebrow">03 · Verified</span>
+        <h1>2027 Event &amp; Moment Master</h1>
+        <p>Every qualifying event, fact-checked and sourced September 2026. Reconfirm anything marked TBC before it goes into client-facing material.</p>
+      </div>
+      <div class="filterbar">
+        <div class="fgroup">
+          <label for="ev-status">Status</label>
+          <select id="ev-status">
+            <option value="all">All</option>
+            <option value="confirmed">Confirmed</option>
+            <option value="tbc">TBC</option>
+          </select>
+        </div>
+        <div class="fgroup">
+          <label for="ev-tier">Tier</label>
+          <select id="ev-tier">
+            <option value="all">All tiers</option>
+            <option value="TIER 1">Tier 1</option>
+            <option value="TIER 2">Tier 2</option>
+            <option value="TIER 3">Tier 3</option>
+            <option value="TIER 4">Tier 4</option>
+          </select>
+        </div>
+        <div class="fgroup grow">
+          <label for="ev-search">Search</label>
+          <input type="search" id="ev-search" placeholder="Event, host, note…">
+        </div>
+        <span class="filter-count" id="ev-count"></span>
+      </div>
+      <div class="table-wrap">
+        <table class="datatable">
+          <thead><tr><th>Event</th><th>2027 date(s)</th><th>Tier</th><th>Host / location</th><th>Note</th><th>Source</th></tr></thead>
+          <tbody id="ev-tbody"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- 04 OPPORTUNITIES -->
+    <section id="view-opportunities" class="view">
+      <div class="view-head">
+        <span class="eyebrow">04 · Event → property → pod</span>
+        <h1>Commercial Opportunity Matrix</h1>
+        <p>Click an event to see its channel components, client fit, and what editorial needs to deliver to make it sellable.</p>
+      </div>
+      <div id="opp-list"></div>
+    </section>
+
+    <!-- 05 CLIENTS -->
+    <section id="view-clients" class="view">
+      <div class="view-head">
+        <span class="eyebrow">05 · Who pays for this</span>
+        <h1>Client Account Map</h1>
+        <p>Named existing accounts mapped to 2027 whitespace, plus new-business categories with no relationship yet.</p>
+      </div>
+      <div class="filterbar">
+        <div class="fgroup">
+          <label for="cl-mode">Show</label>
+          <select id="cl-mode">
+            <option value="all">All accounts</option>
+            <option value="existing">Existing only</option>
+            <option value="new">New business only</option>
+          </select>
+        </div>
+      </div>
+      <div class="client-grid" id="cl-grid"></div>
+    </section>
+
+    <!-- 06 PIPELINE -->
+    <section id="view-pipeline" class="view">
+      <div class="view-head">
+        <span class="eyebrow">06 · What actually carries revenue</span>
+        <h1>Commercial Property Pipeline</h1>
+        <p>The longer-running properties across the year — these give reps something to sell every month, not just on the day.</p>
+      </div>
+      <div class="gantt">
+        <div class="gantt-months" id="gantt-months"></div>
+        <div id="gantt-rows"></div>
+      </div>
+      <h3 style="margin:26px 0 12px; font-size:16px;">Property detail</h3>
+      <div id="pipeline-detail"></div>
+    </section>
+
+    <!-- 07 PAID MEDIA -->
+    <section id="view-paidmedia" class="view">
+      <div class="view-head">
+        <span class="eyebrow">07 · Cross-cutting layer</span>
+        <h1>Paid Media Menu</h1>
+        <p>No pod owns this proactively today — every pod can attach it to a deal. Worth a decision on ownership; see 09 Digital Capacity.</p>
+      </div>
+      <div class="client-grid" id="pm-grid"></div>
+    </section>
+
+    <!-- 08 PRINT -->
+    <section id="view-print" class="view">
+      <div class="view-head">
+        <span class="eyebrow">08 · Detail view for Direct &amp; INC</span>
+        <h1>Print Opportunities</h1>
+        <p>Supplements, wraps, advertorial and special editions by title, tied to the 2027 calendar.</p>
+      </div>
+      <div class="table-wrap">
+        <table class="datatable">
+          <thead><tr><th>Title group</th><th>Opportunity type</th><th>Tied event</th><th>Month</th><th>Lead time</th><th>Client fit</th></tr></thead>
+          <tbody id="print-tbody"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- 09 DIGITAL CAPACITY -->
+    <section id="view-capacity" class="view">
+      <div class="view-head">
+        <span class="eyebrow">09 · Finite resource, not editorial ownership</span>
+        <h1>Digital &amp; IOL Capacity</h1>
+        <p>Two concurrent IOL hub slots, held as a hard discipline. October–November 2027 is the year's real test — Cricket World Cup and Rugby World Cup both run live at once. How the slots are sequenced is set out below.</p>
+      </div>
+      <div class="capacity-grid" id="cap-grid"></div>
+      <div class="decision-box">
+        <div class="dtitle">Two priority hubs, one window — Oct–Nov 2027</div>
+        <p id="cap-decision"></p>
+      </div>
+    </section>
+
+    <!-- 10 LEAD-TIME -->
+    <section id="view-leadtime" class="view">
+      <div class="view-head">
+        <span class="eyebrow">10 · When to start selling</span>
+        <h1>Sales Lead-Time Calendar</h1>
+        <p>When each pod needs to start selling a property to hit its in-market date.</p>
+      </div>
+      <div class="table-wrap">
+        <table class="datatable">
+          <thead><tr><th>Property</th><th>In-market date(s)</th><th>Start selling by</th><th>Lead time</th><th>Pod(s)</th></tr></thead>
+          <tbody id="lt-tbody"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- 11 SCORING -->
+    <section id="view-scoring" class="view">
+      <div class="view-head">
+        <span class="eyebrow">11 · Revenue-weighted, not audience-weighted</span>
+        <h1>Commercial Scoring Model</h1>
+        <p>Adjust the weights below — the scores and ranking recalculate live.</p>
+      </div>
+      <div class="weights-panel" id="weights-panel"></div>
+      <div class="score-list" id="score-list"></div>
+    </section>
+
+  </main>
+</div>
+
+<script>
+// ============================================================
+// VOLT AFRICA — 2027 COMMERCIAL EVENTS PLANNER — DATA
+// ============================================================
+
+const MONTHS = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+
+const TIER_META = {
+  "TIER 1": { label: "Tier 1 · Group anchor", color: "var(--t1)" },
+  "TIER 2": { label: "Tier 2 · Pod property", color: "var(--t2)" },
+  "TIER 3": { label: "Tier 3 · Local", color: "var(--t3)" },
+  "TIER 4": { label: "Tier 4 · Reference only", color: "var(--t4)" },
+};
+
+const POD_META = {
+  "Direct": { color: "var(--pod-direct)", desc: "Print-primary, light digital. Sells into Daily titles + Community titles." },
+  "INC": { color: "var(--pod-inc)", desc: "Agency channel. Print-primary, digital-secondary. Sells Daily titles through media agencies." },
+  "Digital": { color: "var(--pod-digital)", desc: "Sells IOL primarily." },
+};
+
+// ---------- Campaign grouping (used to group Monthly Plan line items together) ----------
+// Order matters — first keyword match wins. Keeps every pod's line items for one
+// property (e.g. Cricket World Cup) grouped as one card instead of scattered across months.
+const CAMPAIGN_RULES = [
+  ["Back to School", "Back to School / New Year Reset", "TIER 2"],
+  ["New Year Reset", "Back to School / New Year Reset", "TIER 2"],
+  ["Comrades", "Comrades Centenary", "TIER 1"],
+  ["Lessons Learnt", "Lessons Learnt (owned platform)", "TIER 2"],
+  ["Valentine's Day", "Valentine's Day", "TIER 4"],
+  ["Budget Speech", "National Budget Speech", "TIER 3"],
+  ["Jazz Festival", "Cape Town Jazz Festival", "TIER 2"],
+  ["Two Oceans", "Two Oceans Marathon", "TIER 2"],
+  ["Freedom Day", "Freedom Day", "TIER 3"],
+  ["Cape Town Marathon", "Cape Town Marathon", "TIER 2"],
+  ["Youth Month", "Youth Month", "TIER 2"],
+  ["Winter Survival", "Winter Survival", "TIER 2"],
+  ["Durban July", "Durban July", "TIER 2"],
+  ["Mandela Day", "Mandela Day", "TIER 3"],
+  ["Women's Month", "Women's Month", "TIER 1"],
+  ["Rugby World Cup", "Rugby World Cup 2027", "TIER 1"],
+  ["Cricket World Cup", "Cricket World Cup", "TIER 1"],
+  ["Heritage Month", "Heritage Month", "TIER 1"],
+  ["Black Friday", "Black Friday", "TIER 1"],
+  ["Festive Season", "Festive Season", "TIER 2"],
+];
+function campaignFor(project){
+  const p = project.toLowerCase();
+  for (const [kw, name, tier] of CAMPAIGN_RULES){
+    if (p.includes(kw.toLowerCase())) return { name, tier };
+  }
+  return { name: project, tier: "TIER 3" };
+}
+
+// ---------- 01 Sales Pod Monthly Plan ----------
+const MONTHLY_PLAN = [
+["January","Direct","Back to School regional bundle","Print + light digital","Daily titles, Community titles","","Retail / education / stationery","Renewal","Print supplement + community activation","Nov 2026","Lead time opens before year-start — flag to pod lead early"],
+["January","Direct","Comrades Centenary — regional runner & club stories","Print + Community","Community titles (KZN/Midlands)","","Sports nutrition, medical aid, running retail","New business","Editorial-led sponsorable series","Nov 2026","Centenary field ~28,000 — biggest ever, strong local-hero angle"],
+["January","INC","New Year Reset / Back to School national package","Print (Daily) + digital extension","Daily titles","","National retail, FMCG","Renewal","Print + digital bundle","Oct 2026","Recurring seasonal — agency budgets lock early"],
+["January","INC","Comrades Centenary — national sponsorship pre-sell","Print (Daily) + IOL feed","Daily titles + IOL","","Insurance, medical aid, sports nutrition, banking","New business","Season-long sponsorship package","Nov 2026","Tier 1 — start the agency conversation now, race is 13 June"],
+["January","Digital","Lessons Learnt — Q1 2027 chapter","Digital (IOL)","IOL","","Financial services / self-improvement brand","Pipeline","Owned platform sponsorship","Dec 2026","Already-built platform — live asset, near-zero build cost"],
+["January","Digital","Comrades Centenary Hub — pre-launch (entries, countdown, training content)","Digital (IOL)","IOL","Checkers/Sixty60","Sports nutrition, insurance","Pipeline","IOL content hub","Dec 2026","Positions IOL as the entries/countdown home ahead of race week"],
+
+["February","Direct","Valentine's Day retail moment","Print + Community","Community titles, Daily titles","","Local retail, florists, restaurants","New business","Tactical print package","Jan 2027","Tier 4 — real but small, short lead time"],
+["February","Direct","Comrades Centenary — regional qualifier stories continue","Print + Community","Community titles","","Running retail, physio/medical","New business","Editorial-led sponsorable series","Dec 2026",""],
+["February","INC","National Budget Speech — financial services content package","Print (Daily) + digital","Daily titles","Standard Bank","Banking, insurance","New business / expansion","Native + partnered content","Jan 2027","Annual financial-services hook, easy to sell against"],
+["February","Digital","IOL Budget Speech live hub","Digital (IOL)","IOL","Standard Bank","Banking","Pipeline","IOL live hub (1-day)","Jan 2027","Short, high-traffic, low production cost"],
+["February","Digital","Comrades Centenary Hub — build continues","Digital (IOL)","IOL","Checkers/Sixty60","Sports nutrition, insurance","Pipeline","IOL content hub","Dec 2026",""],
+
+["March","Direct","Cape Town Jazz Festival — Cape/Community culture package","Print + Community","Cape Town titles, Community titles","","Beverage, lifestyle, travel","New business","Print + local activation","Jan 2027","Festival expanding to month-long in 2027 — more sellable inventory than any prior year"],
+["March","INC","Cape Town Jazz Festival — national lifestyle sponsorship","Print (Daily) + digital","Daily titles","BMW/Condé Nast lane","Beverage, travel, luxury lifestyle","New business","Season sponsorship package","Jan 2027","Natural extension of the BMW luxury-lifestyle relationship"],
+["March","Digital","IOL Cape Town Jazz Festival — month-long content hub","Digital (IOL)","IOL","","Travel/tourism board, luxury lifestyle brand","Pipeline","IOL content hub","Jan 2027","Genuinely new commercial canvas, not a repeat of prior years"],
+["March","Digital","Comrades Centenary Hub — final training-season push","Digital (IOL)","IOL","Checkers/Sixty60","Sports nutrition, insurance","Pipeline","IOL content hub","Dec 2026",""],
+
+["April","Direct","Two Oceans Marathon — Cape regional running culture","Print + Community","Cape Town titles, Community titles","Checkers/Sixty60","Running retail, sports medicine","New business / expansion","Print + local activation","Feb 2027","Bigger field + new format for 2027 — genuine growth story"],
+["April","Direct","Freedom Day — heritage & identity community stories","Print + Community","Community titles","","Cultural / heritage-adjacent brands","New business","Editorial-led sponsorable series","Feb 2027","Echoes existing Identity/Culture/Property work — reusable angle"],
+["April","INC","Two Oceans Marathon national package","Print (Daily) + digital","Daily titles","","Sports nutrition, insurance, medical aid","New business","Print + digital bundle","Feb 2027",""],
+["April","Digital","IOL Two Oceans live hub","Digital (IOL)","IOL","Checkers/Sixty60","Endurance sports sponsor","Pipeline","IOL live event hub","Feb 2027","Reuses the hub pattern already built for Rugby/Comrades"],
+
+["May","Direct","Cape Town Marathon — Major status, local economic impact","Print + Community","Cape Town titles","","Tourism, hospitality, local retail","New business","Print feature package","Mar 2027","Moved to 22–23 May 2027 as a new World Marathon Major"],
+["May","INC","Cape Town Marathon — 'World Marathon Major' national package","Print (Daily) + digital","Daily titles","Sanlam-adjacent categories","Travel, sportswear, banking","New business","National sponsorship package","Mar 2027","First year selling the global upgrade story"],
+["May","Digital","IOL Cape Town Marathon Major hub","Digital (IOL)","IOL","","Travel/airline, luxury lifestyle (BMW lane)","Pipeline","IOL content hub","Mar 2027",""],
+
+["June","Direct","Comrades Centenary — race-day & regional hero stories","Print + Community","Community/Daily titles","","Existing local sponsors + new","New business","Editorial-led sponsorable series","Apr 2027","Tier 1 moment for Direct — biggest single day of their year"],
+["June","Direct","Youth Month community stories","Print + Community","Community titles","","Education, telco, youth brands","New business","Editorial-led sponsorable series","Apr 2027",""],
+["June","INC","Comrades Centenary — national sponsorship activation","Print (Daily) + IOL feed","Daily titles + IOL","","Insurance, medical aid, sports nutrition, banking","New business","Season-long sponsorship, race-week peak","Nov 2026 (sold since Jan)","Tier 1 — the single biggest print+digital property of H1 2027"],
+["June","INC","Winter Survival national package","Print (Daily) + digital","Daily titles","","Energy, generator, home-solutions retail","Renewal","Seasonal commercial franchise","Apr 2027","Commercially strong, practical service content"],
+["June","Digital","IOL Comrades Centenary Hub — race week (Hub Slot 1)","Digital (IOL)","IOL","Checkers/Sixty60 or new national sponsor","Sports nutrition, insurance, banking","Pipeline","IOL content hub — Tier 1","Nov 2026","Uses one of two concurrent IOL hub slots"],
+["June","Digital","Lessons Learnt — June 2027 Youth Month chapter","Digital (IOL)","IOL","","Education, telco, youth-focused brand","Pipeline","Owned platform sponsorship","Apr 2027","Already-built platform, already scripted for this chapter"],
+
+["July","Direct","Durban July — KZN fashion & lifestyle community package","Print + Community","KZN titles, Community titles","","Fashion, beauty, beverage","New business","Print + local activation","May 2027",""],
+["July","Direct","Mandela Day community giving stories","Print + Community","Community titles","","CSI-minded brands","New business","Editorial-led sponsorable series","May 2027","Echoes existing Community Kitchen work"],
+["July","INC","Durban July — national fashion/lifestyle sponsorship","Print (Daily) + digital","Daily titles","","Fashion retail, beverage, beauty","New business","National sponsorship package","May 2027","Title sponsor already taken — pitch adjacent categories"],
+["July","Digital","IOL Durban July hub (Hub Slot 2)","Digital (IOL)","IOL","","Fashion, beauty, beverage brand","Pipeline","IOL content hub","May 2027","Runs alongside Comrades wind-down"],
+["July","Digital","IOL Mandela Day giving campaign","Digital (IOL)","IOL","","CSI / FMCG brand","Pipeline","IOL content hub (short)","Jun 2027",""],
+
+["August","Direct","Women's Month community profiles","Print + Community","Community titles","","Beauty, health, FMCG","New business","Editorial-led sponsorable series","Jun 2027",""],
+["August","INC","Women's Month national package","Print (Daily) + digital","Daily titles","Standard Bank / beauty-FMCG","Banking, beauty, FMCG","Expansion","National sponsorship package","Jun 2027","Extends existing Glamour Women of the Year equity into IOL/Daily"],
+["August","Digital","IOL Women's Month hub","Digital (IOL)","IOL","Standard Bank","Banking, beauty","Pipeline","IOL content hub","Jun 2027",""],
+["August","INC","Rugby World Cup 2027 national sponsorship pre-sell","Print (Daily) + digital","Daily titles","SARU, Checkers/Sixty60","Telco, banking","New business / expansion","Season-long sponsorship package","Jun 2027","Confirmed priority hub for 2027 — full tournament window (1 Oct–13 Nov) runs almost exactly alongside Cricket World Cup"],
+["August","Digital","IOL Cricket World Cup — pre-tournament hub build, fixtures & tickets","Digital (IOL)","IOL","","Telco, broadcast partner, Checkers/Sixty60","Pipeline","IOL content hub — Tier 1 build phase","Jun 2027","7-week tournament from 4 Oct — build starts now"],
+["August","Digital","IOL Rugby World Cup Hub — pre-build (squad news, fixtures, predictor prep)","Digital (IOL)","IOL","SARU, Checkers/Sixty60","Telco","Pipeline","IOL content hub — Tier 1 build phase","Jun 2027","Confirmed priority hub — reuses the existing white-labelled Rugby hub build, opens 1 Oct in Perth"],
+
+["September","Direct","Heritage Month — community & food culture","Print + Community","Community titles","Mochachos","FMCG, food & beverage","Expansion","Editorial-led sponsorable series","Jul 2027","Reuses already-built Heritage Hub / Heritage Kitchen / Heritage Quiz assets"],
+["September","Direct","Heritage Month — Daily Voice local identity package","Print + Daily","Daily Voice","","FMCG, beverage","New business","Print supplement","Jul 2027",""],
+["September","INC","Heritage Month national package","Print (Daily) + digital","Daily titles","Mochachos / banking","FMCG, beverage, banking","Expansion","National sponsorship package","Jul 2027",""],
+["September","Digital","IOL Heritage Month Hub","Digital (IOL)","IOL","Mochachos","FMCG","Pipeline","IOL content hub — live assets ready","Jul 2027","Reuses Heritage Hub/Kitchen/Quiz builds — near-zero incremental cost"],
+["September","Digital","IOL Cricket World Cup Hub launch (Hub Slot 1)","Digital (IOL)","IOL","","Telco, banking, QSR","Pipeline","IOL content hub — Tier 1","Jul 2027",""],
+["September","Digital","IOL Rugby World Cup Hub — build continues ahead of 1 Oct opening","Digital (IOL)","IOL","SARU, Checkers/Sixty60","Telco","Pipeline","IOL content hub — Tier 1 build phase","Jul 2027","Runs as background build this month — Heritage Hub holds Hub Slot 2 in September, see Digital Capacity"],
+
+["October","Direct","Cricket World Cup — regional match-day & fan culture","Print + Community","Community titles","Mochachos","Local retail, QSR","New business","Editorial-led sponsorable series","Aug 2027",""],
+["October","Direct","Black Friday pre-sell — regional retail bookings","Print + Community","Community titles","","Regional retail","New business","Print booking package","Aug 2027",""],
+["October","INC","Cricket World Cup national sponsorship package","Print (Daily) + IOL feed","Daily titles + IOL","","Telco, banking, QSR national brand","New business","Season-long sponsorship, Tier 1","Jun 2027","Highest-priority national property of the year alongside Comrades"],
+["October","INC","Rugby World Cup national sponsorship — live tournament","Print (Daily) + IOL feed","Daily titles + IOL","SARU, Checkers/Sixty60","Telco, banking","New business / expansion","Season-long sponsorship, Tier 1","Jun 2027","Tournament opens 1 Oct in Perth — runs the same window as Cricket World Cup"],
+["October","INC","Black Friday national pre-sell","Print (Daily) + digital","Daily titles","Checkers/Sixty60","National retail, e-commerce","Renewal / expansion","Print + digital bundle","Aug 2027","Running at franchise level this month, not a full hub — goes live in November"],
+["October","Digital","IOL Cricket World Cup Hub — tournament live coverage (Hub Slot 1)","Digital (IOL)","IOL","","National sponsor (telco/banking/QSR)","Pipeline","IOL content hub — Tier 1, biggest digital property of the year","Jun 2027",""],
+["October","Digital","IOL Rugby World Cup Hub — LIVE, opens 1 Oct in Perth (Hub Slot 2)","Digital (IOL)","IOL","SARU, Checkers/Sixty60","Telco","Pipeline","IOL content hub — Tier 1","Jun 2027","Both tournaments live at once — Black Friday Deals Desk rebuild runs in the background this month, see Digital Capacity"],
+
+["November","Direct","Black Friday regional retail activation","Print + Community","Community titles","","Regional retail","New business","Print + activation package","Sep 2027",""],
+["November","Direct","Cricket World Cup final-week regional coverage","Print + Community","Community titles","Mochachos","Local QSR, retail","New business","Editorial-led sponsorable series","Sep 2027",""],
+["November","INC","Black Friday national retail package","Print (Daily) + digital","Daily titles","Checkers/Sixty60","National retail, e-commerce","Renewal","National sponsorship package","Sep 2027",""],
+["November","INC","Cricket World Cup Final national sponsorship moment","Print (Daily) + digital","Daily titles","","Telco, banking","New business","1–2 week national moment","Sep 2027","Final is 21 Nov 2027 — overlaps Black Friday, book pod capacity early"],
+["November","INC","Rugby World Cup Final national sponsorship moment","Print (Daily) + digital","Daily titles","SARU, Checkers/Sixty60","Telco, banking","New business / expansion","1–2 week national moment","Sep 2027","Final is 13 Nov 2027 — wraps before Black Friday, hub slot hands straight over"],
+["November","Digital","IOL Rugby World Cup Final Hub (through 13 Nov, Hub Slot 2)","Digital (IOL)","IOL","SARU, Checkers/Sixty60","Telco","Pipeline","IOL content hub — Tier 1","Jun 2027","Hands Hub Slot 2 to Black Friday Deals Desk the moment the final wraps"],
+["November","Digital","IOL Black Friday Deals Desk — live from 14 Nov (inherits Hub Slot 2)","Digital (IOL)","IOL","Checkers/Sixty60","Retail category","Pipeline","IOL content hub — Tier 1, reused asset","Aug 2027","Fully live well ahead of the 26 Nov peak"],
+["November","Digital","IOL Cricket World Cup Final Hub (Hub Slot 1, through 21 Nov)","Digital (IOL)","IOL","","National sponsor","Pipeline","IOL content hub — Tier 1","Jun 2027","Tournament closes 21 Nov — the year's busiest single month across both hub slots"],
+
+["December","Direct","Festive Season regional retail & travel","Print + Community","Community titles","","Regional retail, travel, hospitality","New business","Print + activation package","Oct 2027",""],
+["December","INC","Festive Season national package","Print (Daily) + digital","Daily titles","","National retail, FMCG, travel","Renewal","National sponsorship package","Oct 2027",""],
+["December","Digital","IOL Festive Season hub","Digital (IOL)","IOL","","Retail, travel, FMCG","Pipeline","IOL content hub","Oct 2027",""],
+["December","Digital","Lessons Learnt — Dec 2027 end-of-year chapter","Digital (IOL)","IOL","","Reflection / financial-services / self-improvement brand","Pipeline","Owned platform sponsorship — recurring annual chapter","Oct 2027","Closes the year the same way the platform opens the next one"],
+].map(r => ({
+  month: r[0], pod: r[1], project: r[2], channels: r[3], titles: r[4],
+  clientNamed: r[5], clientCategory: r[6], status: r[7], product: r[8],
+  startBy: r[9], notes: r[10]
+}));
+
+// ---------- 03 2027 Event Master ----------
+const EVENT_MASTER = [
+{ event: "ICC Cricket World Cup", date: "4 Oct – 21 Nov 2027", status: "Confirmed", host: "South Africa (co-host with Zimbabwe & Namibia)", tier: "TIER 1", source: "icc-cricket.com; Cricinfo", note: "The single biggest property of the year — a full 7-week home tournament.", relevance: "Direct — home tournament" },
+{ event: "Comrades Marathon — Centenary edition", date: "13 June 2027", status: "Confirmed", host: "Durban ↔ Pietermaritzburg, new Kings Park finish", tier: "TIER 1", source: "comrades.com; IOL", note: "Verified genuine centenary race, ~28,000-strong field — the biggest Comrades has ever run.", relevance: "Direct — national sporting institution" },
+{ event: "Rugby World Cup 2027", date: "1 Oct – 13 Nov 2027", status: "Confirmed", host: "Australia — Perth (opening), Sydney (final)", tier: "TIER 1", source: "wikipedia.org; world.rugby", note: "Not hosted in South Africa — no host-city content, no ticketing story. Confirmed as one of the group's priority content hubs for 2027 regardless: Springboks title-defence coverage runs the full tournament window, overlapping Cricket World Cup almost exactly.", relevance: "Direct priority hub — Springboks title defence, full tournament window" },
+{ event: "Two Oceans Marathon", date: "3–4 Apr 2027 (Easter weekend)", status: "Confirmed", host: "Cape Town", tier: "TIER 2", source: "twooceansmarathon.org.za", note: "New format and increased entry capacity announced for 2027.", relevance: "Direct" },
+{ event: "Sanlam Cape Town Marathon", date: "22–23 May 2027", status: "Confirmed", host: "Cape Town", tier: "TIER 2", source: "worldmarathonmajors.com; capetownmarathon.com", note: "Moved from its historical October slot to May 2027 after being confirmed a World Marathon Major.", relevance: "Direct" },
+{ event: "Heritage Month / Heritage Day", date: "September 2027 (Day = Fri 24 Sep)", status: "Confirmed (fixed)", host: "National", tier: "TIER 1", source: "Public holiday, fixed annually", note: "Falls on a Friday — long-weekend effect increases travel/leisure spend.", relevance: "Direct" },
+{ event: "Women's Month / Women's Day", date: "August 2027 (Day = Mon 9 Aug)", status: "Confirmed (fixed)", host: "National", tier: "TIER 1", source: "Public holiday, fixed annually", note: "", relevance: "Direct" },
+{ event: "Youth Month / Youth Day", date: "June 2027 (Day = Wed 16 Jun)", status: "Confirmed (fixed)", host: "National", tier: "TIER 2", source: "Public holiday, fixed annually", note: "Falls inside Comrades month — coordinate pod capacity.", relevance: "Direct" },
+{ event: "Black Friday", date: "26 Nov 2027", status: "Confirmed (calculated)", host: "National / online", tier: "TIER 1", source: "Last Friday of Nov convention", note: "Overlaps Cricket World Cup Final week (21 Nov) — capacity planning needed.", relevance: "Direct" },
+{ event: "Festive Season / December trade", date: "Dec 2027", status: "Confirmed (seasonal)", host: "National", tier: "TIER 2", source: "Standing annual property", note: "", relevance: "Direct" },
+{ event: "Durban July", date: "Early July 2027 (exact date TBC)", status: "TBC", host: "Greyville Racecourse, Durban", tier: "TIER 2", source: "durbanjuly.co.za", note: "Title sponsor is Hollywoodbets — pitch adjacent categories, not the race itself.", relevance: "Direct" },
+{ event: "Cape Town International Jazz Festival", date: "2027 dates TBC — expanding to a month-long celebration", status: "TBC (expansion confirmed)", host: "Cape Town / CTICC", tier: "TIER 2", source: "ewn.co.za; IOL; cticc.co.za", note: "Genuinely new for 2027: expanding from a weekend into a month-long cultural programme — significantly more sellable inventory.", relevance: "Direct" },
+{ event: "National Budget Speech", date: "Late Feb 2027 (exact date TBC)", status: "TBC (annual, late Feb)", host: "Parliament, Cape Town", tier: "TIER 3", source: "Standing annual event", note: "Real annual financial-services hook, low production cost.", relevance: "Direct" },
+{ event: "AFCON — Africa Cup of Nations 2027", date: "Dec 2027 – Jan 2028 (dates TBC)", status: "Host confirmed, dates TBC", host: "Tanzania / Uganda / Kenya", tier: "TIER 4", source: "cafonline.com", note: "Not SA-hosted. Value is contingent on Bafana Bafana qualifying — treat as a tactical hook only if/when qualification is confirmed.", relevance: "Indirect — contingent" },
+{ event: "Back to School / New Year Reset", date: "January 2027", status: "Confirmed (seasonal)", host: "National", tier: "TIER 2", source: "Standing annual property", note: "", relevance: "Direct" },
+{ event: "Winter Survival", date: "June–Aug 2027", status: "Confirmed (seasonal)", host: "National", tier: "TIER 2", source: "Standing annual property", note: "Editorially quiet, commercially strong — practical seasonal service content.", relevance: "Direct" },
+{ event: "National elections", date: "None scheduled", status: "N/A", host: "—", tier: "TIER 4", source: "Next general election due 2029", note: "Confirmed: no national election falls in 2027.", relevance: "N/A" },
+];
+
+// ---------- 04 Commercial Opportunity Matrix ----------
+const OPP_MATRIX = [
+{ event: "ICC Cricket World Cup", property: "IOL Cricket World Cup Hub + national sponsorship package", digital: "IOL live hub: fixtures, scores, explainers, predictor", print: "Daily print previews, wrap sections, match-day features", paid: "Programmatic display around match windows; social clip amplification; retail-media tie-in for QSR/grocery", pods: ["INC","Digital"], clients: "Existing: Checkers/Sixty60, Mochachos. New: telco (streaming/data), national bank, QSR", ask: "A destination hub with match coverage, explainers and host-city content — enough for a client to buy national reach against" },
+{ event: "Comrades Marathon — Centenary", property: "National sponsorship activation + IOL race-week hub + regional hero-story series", digital: "IOL live hub: entries, countdown, route, race-day", print: "Community/Daily regional runner & club features", paid: "Social amplification of runner stories; email/newsletter takeover on race week", pods: ["Direct","INC","Digital"], clients: "Existing: Checkers/Sixty60. New: insurance, medical aid, sports nutrition, banking", ask: "Centenary storytelling angle, regional runner profiles, race-day live coverage" },
+{ event: "Rugby World Cup 2027 — Springboks title defence", property: "IOL Rugby World Cup Hub (confirmed priority hub) + national sponsorship package", digital: "IOL live hub: fixtures, live scores, predictor, squad news, match reaction — reuses the existing white-labelled Rugby Sponsorship Hub build", print: "Daily match-reaction coverage, Bok profile features", paid: "Social-first — fan predictor amplification, match-day content bursts; programmatic around kickoff windows", pods: ["Digital","INC"], clients: "Existing: SARU, Checkers/Sixty60 (hub already built for both). New: telco (streaming), banking, QSR", ask: "Full-tournament match coverage and Bok profile storytelling, 1 Oct–13 Nov — no host-city angle since it isn't SA-hosted, but real live-event coverage for the whole window" },
+{ event: "Heritage Month", property: "IOL Heritage Hub + community food-culture package", digital: "Reused Heritage Hub / Heritage Kitchen / Heritage Quiz builds", print: "Daily Voice + Community local-identity supplements", paid: "Social recipe/culture content amplification", pods: ["Direct","INC","Digital"], clients: "Existing: Mochachos. New: FMCG, beverage, banking", ask: "Local food-culture and identity stories that plug into the already-built hub format" },
+{ event: "Black Friday", property: "IOL Deals Desk (reused build) + national retail package", digital: "Editor-curated deal picks, buying guides, sponsor spotlight", print: "Daily + Community retail activation, pre-sell bookings", paid: "Retail-media product feeds where a partner supplies one; programmatic retargeting into Festive", pods: ["Direct","INC","Digital"], clients: "Existing: Checkers/Sixty60. New: national retail, e-commerce", ask: "Editor-curated deal picks and buying guides — not live price-feed grids" },
+{ event: "Two Oceans / Cape Town Marathon", property: "Regional running-culture packages + IOL live hubs", digital: "IOL live hub per race", print: "Cape/Community print features", paid: "Social amplification of finisher stories", pods: ["Direct","INC","Digital"], clients: "Existing: Checkers/Sixty60. New: running retail, sports medicine, travel/tourism", ask: "Race-day coverage plus a genuine 'why this matters now' angle for the Cape Town Marathon Major upgrade" },
+{ event: "Women's Month", property: "National + regional profile packages, IOL hub", digital: "IOL hub, profile series", print: "Community + Daily profile features", paid: "Social amplification", pods: ["Direct","INC","Digital"], clients: "Existing: Standard Bank, beauty/FMCG. New: health brand", ask: "Women's profile and achievement stories the sponsor can be credibly associated with" },
+{ event: "Cape Town Jazz Festival (month-long)", property: "National lifestyle sponsorship + month-long IOL hub", digital: "IOL month-long content hub", print: "Cape/Community culture features", paid: "Social/event amplification", pods: ["Direct","INC","Digital"], clients: "Existing: BMW/Condé Nast lane. New: beverage, travel, luxury lifestyle", ask: "Coverage spread across the full month — genuinely new inventory, not a single-weekend wrap-up" },
+{ event: "Durban July", property: "Regional fashion & lifestyle package", digital: "IOL hub (secondary to race day)", print: "KZN/Community fashion features", paid: "Social amplification of fashion/lifestyle content", pods: ["Direct","INC","Digital"], clients: "New only — title sponsor already taken. Target fashion retail, beauty, beverage", ask: "Fashion and lifestyle culture coverage that sits alongside, not on top of, the race itself" },
+{ event: "Winter Survival", property: "Seasonal commercial franchise, no dedicated hub required", digital: "Daily/Community digital extension of print package", print: "Daily + Community seasonal features", paid: "Retail-media tie-in for generator/home-solutions retail", pods: ["Direct","INC"], clients: "New: energy, generator, home-solutions retail", ask: "Practical seasonal service content — useful, not necessarily newsy" },
+{ event: "National Budget Speech", property: "1-day national moment, IOL hub + Daily commentary", digital: "IOL live hub (1 day)", print: "Daily commentary/analysis pages", paid: "None needed — organic reach is high on the day", pods: ["INC","Digital"], clients: "Existing: Standard Bank. New: other banks, insurers", ask: "Live commentary and explainer content on Budget Speech day" },
+];
+
+// ---------- 05 Client Account Map ----------
+const CLIENTS = [
+{ name: "Standard Bank", category: "Banking", existing: true, relationship: "'Every Financial Journey' partnership — GQ/Glamour/House & Garden primary, IOL secondary", titles: "GQ, Glamour, House & Garden, IOL", opportunities: "National Budget Speech hub, Women's Month package, Comrades centenary financial-milestone angle", growth: "Extend the Money Journey Hub logic into IOL/Daily moments the Condé Nast deal doesn't reach — Budget Speech is a clean, low-cost first extension", pods: ["INC","Digital"] },
+{ name: "BMW / Condé Nast", category: "Automotive / Luxury", existing: true, relationship: "'Future of Luxury' partnership — H&G Designers of the Year + Glamour Hair & Beauty Masterclass", titles: "GQ, Glamour, House & Garden", opportunities: "Cape Town Jazz Festival (month-long expansion), Durban July adjacent categories", growth: "Luxury-lifestyle equity extends naturally into Jazz Festival and Durban July — both are affluent-culture moments outside auto", pods: ["INC","Digital"] },
+{ name: "Mochachos", category: "FMCG / QSR", existing: true, relationship: "Audience Intelligence Hub client (BrandMapp data portal)", titles: "IOL (portal)", opportunities: "Heritage Month (reuses Heritage Hub/Kitchen/Quiz builds), Cricket World Cup viewing-occasion content", growth: "QSR + Cricket World Cup match-day content is a strong, cheap-to-build extension of an existing relationship", pods: ["Direct","INC","Digital"] },
+{ name: "Checkers / Sixty60", category: "Retail / FMCG", existing: true, relationship: "Rugby World Cup 2027 sponsorship hub already built", titles: "IOL", opportunities: "Two Oceans/Comrades hub extension, Black Friday Deals Desk, Cricket World Cup viewing occasions, Rugby World Cup priority hub (1 Oct–13 Nov)", growth: "The Rugby hub build proves the production pattern works — reusable for running events and Black Friday at low incremental cost", pods: ["Direct","INC","Digital"] },
+{ name: "SARU (SA Rugby)", category: "Sports federation", existing: true, relationship: "Rugby World Cup 2027 hub adapted as presenting-sponsor version", titles: "IOL", opportunities: "Springboks title-defence priority hub — confirmed for 2027, full tournament window (1 Oct–13 Nov)", growth: "Confirm final sponsor mix (SARU + Checkers/Sixty60 vs. a new national telco/banking partner) — the hub is confirmed and the asset exists, now it needs its funding locked", pods: ["Digital","INC"] },
+{ name: "New business — Telco", category: "Telco", existing: false, relationship: "No current relationship", titles: "—", opportunities: "Cricket World Cup (streaming/data angle), Cape Town Marathon Major (connectivity/travel)", growth: "Cricket World Cup is the strongest new-logo pitch of the year — 7 weeks of national home-tournament reach", pods: ["INC","Digital"] },
+{ name: "New business — Insurance / Medical Aid", category: "Insurance", existing: false, relationship: "No current relationship", titles: "—", opportunities: "Comrades Centenary (life/health milestone angle), Two Oceans/Cape Town Marathon", growth: "Comrades Centenary is a once-in-a-generation hook for this category — start the pitch early", pods: ["INC","Direct"] },
+{ name: "New business — Travel / Tourism", category: "Travel", existing: false, relationship: "No current relationship", titles: "—", opportunities: "Cape Town Marathon (Major status), Cricket World Cup (inbound tourism), Cape Town Jazz Festival", growth: "Cape Town Marathon's promotion to Major status is a one-time news hook for a tourism-board or airline pitch", pods: ["INC","Digital"] },
+{ name: "New business — Energy / Home Solutions", category: "Energy", existing: false, relationship: "No current relationship", titles: "—", opportunities: "Winter Survival seasonal franchise", growth: "Practical-utility content, not newsy — sell on service value", pods: ["Direct","INC"] },
+];
+
+// ---------- 06 Commercial Property Pipeline (month-span for Gantt) ----------
+const PIPELINE = [
+{ name: "Comrades Centenary — Road to 13 June", startIdx: 0, endIdx: 5, channels: "Print + Digital + Paid Media", pods: ["Direct","INC","Digital"], desc: "Countdown, entries, training content, regional hero stories, building to race-day peak.", status: "Sell now" },
+{ name: "Cricket World Cup — Home Tournament", startIdx: 7, endIdx: 10, channels: "Print + Digital + Paid Media", pods: ["INC","Digital"], desc: "Pre-tournament build (Aug), launch (Sep), live coverage (Oct), Final (Nov).", status: "Sell now" },
+{ name: "Black Friday → Festive Runway", startIdx: 9, endIdx: 11, channels: "Print + Digital + Paid Media", pods: ["Direct","INC","Digital"], desc: "Pre-sell in October, live Deals Desk in November, rolls into Festive trading through December.", status: "Sell now" },
+{ name: "Heritage Hub / Kitchen / Quiz", startIdx: 8, endIdx: 8, channels: "Digital + Print", pods: ["Direct","INC","Digital"], desc: "Already-built asset suite — lowest incremental production cost of any property here.", status: "Ready to sell" },
+{ name: "Lessons Learnt (owned platform)", startIdx: 0, endIdx: 0, channels: "Digital", pods: ["Digital"], desc: "Chaptered — Q1, Youth Month (Jun), year-end (Dec).", status: "Ready to sell", multiSpan: [0,5,11] },
+{ name: "Rugby World Cup 2027 — Springboks Title Defence Hub", startIdx: 7, endIdx: 10, channels: "Digital + Print + Paid Media", pods: ["Digital","INC"], desc: "Confirmed priority hub for 2027. Reuses the existing white-labelled Rugby Sponsorship Hub build. Runs the full 1 Oct–13 Nov tournament window, sequenced against Cricket World Cup for IOL hub capacity.", status: "Sell now" },
+{ name: "Winter Survival", startIdx: 5, endIdx: 7, channels: "Print + Digital", pods: ["Direct","INC"], desc: "Practical seasonal service content — commercially strong, editorially quiet by design.", status: "Sell now" },
+{ name: "Cape Town Jazz Festival (month-long)", startIdx: 2, endIdx: 2, channels: "Print + Digital + Paid Media", pods: ["Direct","INC","Digital"], desc: "First year of the festival's expansion — genuinely new inventory.", status: "Sell once dates confirm" },
+];
+
+// ---------- 07 Paid Media Layer ----------
+const PAID_MEDIA = [
+{ product: "Programmatic display", desc: "Bought media around match windows / event peaks, beyond owned inventory reach", pairs: "Cricket World Cup, Comrades, Black Friday", pods: "Any", clients: "National brands wanting reach beyond IOL/Daily's organic audience" },
+{ product: "Social amplification", desc: "Paid boosting of hub/hero content on Meta/TikTok/X", pairs: "All hub properties", pods: "Any", clients: "Any sponsor wanting reach beyond the article page" },
+{ product: "Retail media / product-feed placements", desc: "Sponsored product placements inside e-commerce-adjacent content", pairs: "Black Friday, Cricket World Cup viewing-occasion content", pods: "Digital, INC", clients: "Retail/e-commerce partners who can supply a product feed" },
+{ product: "Search / SEO-led content packages", desc: "Content built to capture high-intent search demand around an event", pairs: "Cricket World Cup, Comrades, Cape Town Marathon", pods: "Digital, INC", clients: "Travel, insurance, sports nutrition — high-intent categories" },
+{ product: "Newsletter takeover", desc: "Sponsor-branded edition or panel in an event-week newsletter", pairs: "Comrades race week, Black Friday, Cricket World Cup Final", pods: "Digital", clients: "Any existing IOL sponsor wanting a concentrated single-day push" },
+{ product: "Video / Reels amplification", desc: "Paid distribution of match-reaction or event video content", pairs: "Rugby World Cup, Cricket World Cup, Durban July", pods: "Digital, INC", clients: "Telco, QSR, fashion/beauty" },
+];
+
+// ---------- 08 Print Opportunities ----------
+const PRINT_OPS = [
+{ group: "Daily titles (national)", type: "Special edition / wraparound", event: "Comrades Centenary race-day", month: "June", lead: "5 months", fit: "Insurance, medical aid, sports nutrition, banking" },
+{ group: "Daily titles (national)", type: "Special edition / wraparound", event: "Cricket World Cup opening & Final", month: "Sep & Nov", lead: "3–4 months", fit: "Telco, banking, QSR" },
+{ group: "Daily titles (national)", type: "Supplement", event: "Black Friday retail guide", month: "November", lead: "3 months", fit: "National retail, e-commerce" },
+{ group: "Daily titles (national)", type: "Advertorial series", event: "Heritage Month", month: "September", lead: "2 months", fit: "FMCG, beverage, banking" },
+{ group: "Community titles (regional)", type: "Local activation + advertorial", event: "Comrades regional hero stories", month: "Jan – Jun", lead: "Rolling", fit: "Local sponsors, running retail" },
+{ group: "Community titles (regional)", type: "Local activation + advertorial", event: "Two Oceans / Cape Town Marathon", month: "Apr & May", lead: "2 months", fit: "Local running retail, tourism" },
+{ group: "Community titles (regional)", type: "Local activation + advertorial", event: "Durban July", month: "July", lead: "2 months", fit: "Fashion, beauty, beverage" },
+{ group: "Community titles (regional)", type: "Supplement", event: "Back to School", month: "January", lead: "2 months (prior year)", fit: "Retail, education" },
+{ group: "Daily Voice", type: "Special edition", event: "Heritage Month local identity", month: "September", lead: "2 months", fit: "FMCG, beverage" },
+{ group: "Daily titles (national)", type: "Supplement", event: "Winter Survival", month: "Jun – Aug", lead: "1–2 months", fit: "Energy, generator, home solutions" },
+{ group: "Cape Town titles + Community", type: "Special edition", event: "Cape Town Jazz Festival (month-long)", month: "March", lead: "2 months (pending dates)", fit: "Beverage, travel, luxury lifestyle" },
+];
+
+// ---------- 09 Digital & IOL Capacity ----------
+const DIGITAL_CAPACITY = [
+{ month: "January", slot1: "Comrades Centenary Hub (pre-launch)", slot2: "—", franchise: "Back to School franchise", reused: "Partial" },
+{ month: "February", slot1: "Comrades Centenary Hub (build)", slot2: "IOL Budget Speech (1-day)", franchise: "—", reused: "Yes" },
+{ month: "March", slot1: "Comrades Centenary Hub (build)", slot2: "Cape Town Jazz Festival Hub", franchise: "—", reused: "No" },
+{ month: "April", slot1: "Comrades Centenary Hub (build)", slot2: "Two Oceans live hub", franchise: "—", reused: "Partial" },
+{ month: "May", slot1: "Comrades Centenary Hub (final build)", slot2: "Cape Town Marathon Major hub", franchise: "—", reused: "No" },
+{ month: "June", slot1: "Comrades Centenary Hub (RACE WEEK — peak)", slot2: "Lessons Learnt — Youth Month chapter", franchise: "Youth Month franchise", reused: "Yes" },
+{ month: "July", slot1: "Durban July hub", slot2: "Mandela Day campaign", franchise: "—", reused: "Partial" },
+{ month: "August", slot1: "Cricket World Cup Hub (pre-build)", slot2: "Rugby World Cup Hub (pre-build)", franchise: "Women's Month franchise", reused: "Partial" },
+{ month: "September", slot1: "Cricket World Cup Hub (LAUNCH)", slot2: "Heritage Hub (reused asset)", franchise: "Heritage franchise; Rugby World Cup builds in the background", reused: "Yes" },
+{ month: "October", slot1: "Cricket World Cup Hub (LIVE)", slot2: "Rugby World Cup Hub (LIVE, opens 1 Oct Perth)", franchise: "Black Friday pre-sell franchise (background build, not a full hub)", reused: "Partial", conflict: true },
+{ month: "November", slot1: "Cricket World Cup Hub (FINAL 21 Nov, Slot 1)", slot2: "Rugby World Cup Hub (FINAL 13 Nov) → hands off to Black Friday Deals Desk (LIVE from 14 Nov)", franchise: "—", reused: "Yes", conflict: true },
+{ month: "December", slot1: "Festive Season hub", slot2: "Lessons Learnt — year-end chapter", franchise: "—", reused: "Yes" },
+];
+const CAPACITY_DECISION = "Cricket World Cup (4 Oct–21 Nov) and Rugby World Cup 2027 (1 Oct–13 Nov) are both confirmed priority content hubs for 2027, and their tournament windows run almost exactly in parallel — there is no scenario where only one gets IOL hub resource. Sequencing: through September, Cricket World Cup holds Hub Slot 1 while it builds to launch and Heritage Hub (a reused, low-cost asset) holds Slot 2; Rugby World Cup builds in the background without a dedicated slot. From 1 October both tournaments go live and take a hub slot each, so Black Friday pre-sell runs at franchise level rather than as a third hub through October. Rugby World Cup's final on 13 November frees Hub Slot 2, which hands straight to the Black Friday Deals Desk — live well ahead of the 26 November peak — while Cricket World Cup holds Slot 1 through its own final on 21 November. November is the busiest month of the year across both slots; confirm the handoff date with the Digital pod ahead of time.";
+
+// ---------- 10 Sales Lead-Time Calendar ----------
+const LEAD_TIME = [
+{ property: "Comrades Centenary — national sponsorship", inMarket: "13 June 2027", startBy: "November 2026", lead: "~7 months", pods: ["INC"] },
+{ property: "Comrades Centenary — regional/hero stories", inMarket: "13 June 2027", startBy: "November 2026", lead: "~7 months", pods: ["Direct"] },
+{ property: "Cricket World Cup — national sponsorship", inMarket: "4 Oct – 21 Nov 2027", startBy: "June 2027", lead: "~4 months", pods: ["INC","Digital"] },
+{ property: "Back to School / New Year Reset", inMarket: "January 2027", startBy: "October 2026", lead: "~3 months", pods: ["Direct","INC"] },
+{ property: "Winter Survival", inMarket: "June – August 2027", startBy: "April 2027", lead: "~2 months", pods: ["Direct","INC"] },
+{ property: "Two Oceans Marathon", inMarket: "3–4 April 2027", startBy: "February 2027", lead: "~2 months", pods: ["Direct","INC"] },
+{ property: "Cape Town Marathon (new May date)", inMarket: "22–23 May 2027", startBy: "March 2027", lead: "~2 months", pods: ["Direct","INC"] },
+{ property: "Heritage Month", inMarket: "September 2027", startBy: "July 2027", lead: "~2 months", pods: ["Direct","INC","Digital"] },
+{ property: "Black Friday", inMarket: "26 November 2027", startBy: "August 2027", lead: "~3 months", pods: ["Direct","INC","Digital"] },
+{ property: "Durban July", inMarket: "Early July 2027 (TBC)", startBy: "May 2027", lead: "~2 months", pods: ["Direct","INC"] },
+{ property: "Cape Town Jazz Festival", inMarket: "March 2027 (TBC)", startBy: "January 2027", lead: "~2 months", pods: ["Direct","INC","Digital"] },
+{ property: "Rugby World Cup 2027 — national sponsorship", inMarket: "1 Oct – 13 Nov 2027", startBy: "June 2027", lead: "~4 months", pods: ["INC","Digital"] },
+{ property: "Women's Month", inMarket: "August 2027", startBy: "June 2027", lead: "~2 months", pods: ["Direct","INC"] },
+{ property: "Festive Season", inMarket: "December 2027", startBy: "October 2027", lead: "~2 months", pods: ["Direct","INC"] },
+];
+
+// ---------- 11 Commercial Scoring Model ----------
+const SCORING_WEIGHTS_DEFAULT = { revenue: 0.35, demand: 0.25, leadtime: 0.15, longevity: 0.15, editorial: 0.10 };
+const SCORING = [
+{ name: "ICC Cricket World Cup", revenue: 5, demand: 5, leadtime: 3, longevity: 5, editorial: 5, rationale: "Home tournament, 7 weeks, national reach, multiple client categories, high lead-time pressure given the scale" },
+{ name: "Comrades Centenary", revenue: 5, demand: 5, leadtime: 4, longevity: 4, editorial: 5, rationale: "Centenary storytelling is a once-only hook; biggest field ever; strong sales momentum already possible" },
+{ name: "Black Friday", revenue: 5, demand: 5, leadtime: 4, longevity: 5, editorial: 3, rationale: "Proven revenue property with a reusable built asset — highest confidence, lowest production risk" },
+{ name: "Heritage Month", revenue: 4, demand: 4, leadtime: 4, longevity: 5, editorial: 4, rationale: "Reused assets make this very low-cost to sell again — strong margin, not just strong reach" },
+{ name: "Cape Town Marathon (Major status)", revenue: 3, demand: 3, leadtime: 3, longevity: 3, editorial: 3, rationale: "New Major status is a genuine story but sales evidence is unproven this cycle — treat as a test, not a certainty" },
+{ name: "Rugby World Cup 2027 (Springboks title defence)", revenue: 5, demand: 4, leadtime: 3, longevity: 4, editorial: 4, rationale: "Confirmed priority hub for 2027, running almost exactly the same window as Cricket World Cup — reused asset keeps production cost low despite full-tournament sponsorship inventory" },
+{ name: "Cape Town Jazz Festival (month-long)", revenue: 3, demand: 2, leadtime: 3, longevity: 3, editorial: 3, rationale: "Expansion is new and unproven with clients — worth testing in year one, not over-committing" },
+{ name: "Two Oceans / Cape Town Marathon (general)", revenue: 3, demand: 3, leadtime: 4, longevity: 3, editorial: 3, rationale: "Reliable annual property, moderate ceiling" },
+{ name: "Winter Survival", revenue: 3, demand: 3, leadtime: 4, longevity: 4, editorial: 2, rationale: "Editorially quiet, but real client demand — practical seasonal utility content" },
+{ name: "Durban July", revenue: 2, demand: 2, leadtime: 4, longevity: 3, editorial: 3, rationale: "Title sponsor already taken; only adjacent categories available, smaller addressable client list" },
+{ name: "Women's Month", revenue: 3, demand: 3, leadtime: 4, longevity: 3, editorial: 4, rationale: "Reliable, extendable from existing Standard Bank relationship" },
+{ name: "National Budget Speech", revenue: 2, demand: 3, leadtime: 5, longevity: 3, editorial: 2, rationale: "Small, cheap, easy — good filler property, not a headline one" },
+{ name: "Valentine's Day", revenue: 1, demand: 1, leadtime: 5, longevity: 1, editorial: 1, rationale: "Tactical only — correctly excluded from serious planning" },
+];
+
+</script>
+<script>
+// ============================================================
+// VOLT AFRICA — 2027 COMMERCIAL EVENTS PLANNER — APP LOGIC
+// ============================================================
+(function(){
+  "use strict";
+
+  const $ = (sel, ctx) => (ctx||document).querySelector(sel);
+  const $$ = (sel, ctx) => Array.from((ctx||document).querySelectorAll(sel));
+  const esc = (s) => (s==null?"":String(s)).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+
+  const TIER_ORDER = ["TIER 1","TIER 2","TIER 3","TIER 4"];
+
+  // ---------------- Nav / view switching ----------------
+  function initNav(){
+    const buttons = $$(".rail-nav button");
+    buttons.forEach(btn => {
+      btn.addEventListener("click", () => showView(btn.dataset.view));
+    });
+  }
+  function showView(id){
+    $$(".view").forEach(v => v.classList.toggle("active", v.id === "view-" + id));
+    $$(".rail-nav button").forEach(b => b.classList.toggle("active", b.dataset.view === id));
+    window.scrollTo({top:0, behavior:"instant" in window ? "instant" : "auto"});
+    const mainEl = document.querySelector(".main");
+    if (mainEl) mainEl.scrollTop = 0;
+  }
+  window.__navigateTo = function(id, opts){
+    showView(id);
+    if (opts && opts.month && id === "monthly"){
+      $("#mp-month").value = opts.month;
+      renderMonthlyPlan();
+    }
+  };
+
+  // ---------------- Overview ----------------
+  function renderOverview(){
+    const totalProjects = MONTHLY_PLAN.length;
+    const namedClients = new Set(MONTHLY_PLAN.map(r=>r.clientNamed).filter(Boolean));
+    CLIENTS.filter(c=>c.existing).forEach(c=>namedClients.add(c.name));
+    const tier1 = EVENT_MASTER.filter(e=>e.tier==="TIER 1").length;
+
+    $("#stat-projects").textContent = totalProjects;
+    $("#stat-clients").textContent = namedClients.size;
+    $("#stat-tier1").textContent = tier1;
+    $("#stat-pods").textContent = "3";
+
+    // Year rail: bars per month, one bar per pod stacked by count, coloured by pod
+    const rail = $("#yearrail");
+    rail.innerHTML = "";
+    const maxCount = Math.max(...MONTHS.map(m => MONTHLY_PLAN.filter(r=>r.month===m).length));
+    MONTHS.forEach((m, idx) => {
+      const rows = MONTHLY_PLAN.filter(r => r.month === m);
+      const podCounts = {Direct:0, INC:0, Digital:0};
+      rows.forEach(r => podCounts[r.pod]++);
+      const btn = document.createElement("button");
+      btn.className = "yr-month";
+      btn.type = "button";
+      const barsHtml = ["Direct","INC","Digital"].map(pod => {
+        const h = Math.max(4, (podCounts[pod] / (maxCount||1)) * 40);
+        const color = pod === "Direct" ? "var(--pod-direct)" : pod === "INC" ? "var(--pod-inc)" : "var(--pod-digital)";
+        return `<span class="yr-bar" style="height:${h}px;background:${color}"></span>`;
+      }).join("");
+      btn.innerHTML = `
+        <div class="yr-bars">${barsHtml}</div>
+        <span class="yr-name">${m.slice(0,3)}</span>
+        <span class="yr-count">${rows.length}</span>
+      `;
+      btn.addEventListener("click", () => window.__navigateTo("monthly", {month: m}));
+      rail.appendChild(btn);
+    });
+  }
+
+  // ---------------- 01 Monthly Plan ----------------
+  function populateMonthlyFilters(){
+    const monthSel = $("#mp-month");
+    MONTHS.forEach(m => monthSel.insertAdjacentHTML("beforeend", `<option value="${m}">${m}</option>`));
+  }
+
+  // Group every Monthly Plan line item by campaign/property (e.g. all Cricket World Cup
+  // rows across Direct/INC/Digital and Aug-Nov become one card) instead of scattering
+  // them across separate month sections — computed once from the full unfiltered data.
+  function buildCampaignIndex(){
+    const map = new Map();
+    MONTHLY_PLAN.forEach(r => {
+      const { name, tier } = campaignFor(r.project);
+      if (!map.has(name)) map.set(name, { name, tier, rows: [] });
+      map.get(name).rows.push(r);
+    });
+    const arr = Array.from(map.values()).map(c => {
+      const idxs = c.rows.map(r => MONTHS.indexOf(r.month));
+      const pods = new Set(c.rows.map(r => r.pod));
+      c.rows.sort((a,b) => MONTHS.indexOf(a.month) - MONTHS.indexOf(b.month));
+      return Object.assign(c, { minIdx: Math.min(...idxs), maxIdx: Math.max(...idxs), podCount: pods.size, total: c.rows.length });
+    });
+    arr.sort((a,b) => a.minIdx - b.minIdx || a.maxIdx - b.maxIdx);
+    return arr;
+  }
+  const CAMPAIGN_INDEX = buildCampaignIndex();
+
+  function campaignSpanText(camp){
+    return camp.minIdx === camp.maxIdx ? MONTHS[camp.minIdx].slice(0,3) : `${MONTHS[camp.minIdx].slice(0,3)} – ${MONTHS[camp.maxIdx].slice(0,3)}`;
+  }
+
+  function renderCampaignCard(camp, rows){
+    const shownNote = rows.length < camp.total ? ` · showing ${rows.length} of ${camp.total}` : "";
+    const rowsHtml = rows.map(r => {
+      const pillClass = r.pod === "Direct" ? "pill-direct" : r.pod === "INC" ? "pill-inc" : "pill-digital";
+      const client = r.clientNamed ? `${esc(r.clientNamed)} <span style="color:var(--muted); font-weight:400;">(existing)</span>` : esc(r.clientCategory);
+      const noteRow = r.notes ? `<tr class="split-note-row"><td colspan="8" class="split-note">${esc(r.notes)}</td></tr>` : "";
+      return `
+        <tr>
+          <td style="white-space:nowrap; font-weight:600;">${esc(r.month.slice(0,3))}</td>
+          <td><span class="pill ${pillClass}">${esc(r.pod)}</span></td>
+          <td style="min-width:100px;">${esc(r.project)}</td>
+          <td style="min-width:64px;">${esc(r.channels)}</td>
+          <td style="min-width:74px;">${client}</td>
+          <td style="min-width:78px;">${esc(r.product)}</td>
+          <td style="min-width:72px;">${esc(r.status)}</td>
+          <td style="white-space:nowrap;">${esc(r.startBy)}</td>
+        </tr>
+        ${noteRow}
+      `;
+    }).join("");
+
+    return `
+      <div class="campaign-card">
+        <div class="campaign-head">
+          <div>
+            <h3>${esc(camp.name)}</h3>
+            <div class="campaign-meta">${campaignSpanText(camp)} 2027 · ${camp.total} line item${camp.total===1?"":"s"} across ${camp.podCount} pod${camp.podCount===1?"":"s"}${shownNote}</div>
+          </div>
+          <span class="tier-badge" style="background:${TIER_META[camp.tier].color}">${camp.tier.replace("TIER ","T")}</span>
+        </div>
+        <div class="table-wrap">
+          <table class="datatable split-table">
+            <thead><tr><th>Month</th><th>Pod</th><th>Project</th><th>Channel mix</th><th>Client</th><th>Product</th><th>Status</th><th>Start selling</th></tr></thead>
+            <tbody>${rowsHtml}</tbody>
+          </table>
+        </div>
+      </div>
+    `;
+  }
+
+  function renderMonthlyPlan(){
+    const month = $("#mp-month").value;
+    const pod = $("#mp-pod").value;
+    const channel = $("#mp-channel").value;
+    const q = $("#mp-search").value.trim().toLowerCase();
+
+    let totalMatches = 0;
+    const cards = CAMPAIGN_INDEX.map(camp => {
+      const rows = camp.rows.filter(r => {
+        if (month !== "all" && r.month !== month) return false;
+        if (pod !== "all" && r.pod !== pod) return false;
+        if (channel !== "all" && !r.channels.toLowerCase().includes(channel.toLowerCase())) return false;
+        if (q){
+          const hay = [camp.name, r.project, r.clientNamed, r.clientCategory, r.titles, r.notes, r.product].join(" ").toLowerCase();
+          if (!hay.includes(q)) return false;
+        }
+        return true;
+      });
+      if (!rows.length) return null;
+      totalMatches += rows.length;
+      return renderCampaignCard(camp, rows);
+    }).filter(Boolean);
+
+    $("#mp-count").textContent = `${totalMatches} project${totalMatches===1?"":"s"} across ${cards.length} campaign${cards.length===1?"":"s"}`;
+
+    const container = $("#mp-results");
+    if (!cards.length){
+      container.innerHTML = `<div class="empty-state">No projects match these filters. Try clearing one.</div>`;
+      return;
+    }
+    container.innerHTML = cards.join("");
+  }
+  function clearMonthlyFilters(){
+    $("#mp-month").value = "all";
+    $("#mp-pod").value = "all";
+    $("#mp-channel").value = "all";
+    $("#mp-search").value = "";
+    renderMonthlyPlan();
+  }
+
+  // ---------------- 02 Calendar ----------------
+  const EXEC_CAL = [
+    ["January","Back to School · Comrades Centenary build-up begins","Retail/education; Insurance/medical aid","TIER 2"],
+    ["February","Valentine's Day (tactical) · National Budget Speech","Standard Bank","TIER 4"],
+    ["March","Cape Town Jazz Festival (now month-long)","BMW/Condé Nast lane, travel/tourism","TIER 2"],
+    ["April","Two Oceans Marathon · Freedom Day","Checkers/Sixty60","TIER 2"],
+    ["May","Sanlam Cape Town Marathon — new May date, now a World Marathon Major","Sanlam-adjacent categories, travel","TIER 2"],
+    ["June","Comrades Centenary (13 June) · Youth Month","National insurance/medical aid/banking sponsor","TIER 1"],
+    ["July","Durban July · Mandela Day · Tax season","Fashion/beauty/beverage","TIER 2"],
+    ["August","Women's Month · Cricket World Cup pre-build · Rugby World Cup pre-build","Standard Bank; Telco/broadcast; SARU/Checkers-Sixty60","TIER 1"],
+    ["September","Heritage Month · Cricket World Cup opens (4 Oct) · Rugby World Cup opens in Australia (1 Oct) — both confirmed priority hubs","Mochachos; National telco/banking/QSR; SARU/Checkers-Sixty60","TIER 1"],
+    ["October","Cricket World Cup live · Rugby World Cup live (Australia) · Black Friday pre-sell","National telco/banking/QSR; SARU/Checkers-Sixty60","TIER 1"],
+    ["November","Rugby World Cup Final (13 Nov) · Cricket World Cup Final (21 Nov) · Black Friday (26 Nov)","SARU/Checkers-Sixty60; National telco/banking","TIER 1"],
+    ["December","Festive Season","National retail/FMCG/travel","TIER 2"],
+  ];
+  function renderCalendar(){
+    const tbody = $("#cal-tbody");
+    tbody.innerHTML = EXEC_CAL.map(([m,moment,client,tier]) => `
+      <tr>
+        <td style="font-weight:600;">${m}</td>
+        <td>${esc(moment)}</td>
+        <td>${esc(client)}</td>
+        <td><span class="tier-badge" style="background:${TIER_META[tier].color}">${tier}</span></td>
+      </tr>
+    `).join("");
+  }
+
+  // ---------------- 03 Events ----------------
+  function renderEvents(){
+    const status = $("#ev-status").value;
+    const tier = $("#ev-tier").value;
+    const q = $("#ev-search").value.trim().toLowerCase();
+    let rows = EVENT_MASTER.filter(e => {
+      if (status !== "all"){
+        const isConfirmed = e.status.toLowerCase().startsWith("confirmed");
+        if (status === "confirmed" && !isConfirmed) return false;
+        if (status === "tbc" && isConfirmed) return false;
+      }
+      if (tier !== "all" && e.tier !== tier) return false;
+      if (q && !(e.event+" "+e.note+" "+e.host).toLowerCase().includes(q)) return false;
+      return true;
+    });
+    $("#ev-count").textContent = rows.length + (rows.length===1?" event":" events");
+    $("#ev-tbody").innerHTML = rows.map(e => `
+      <tr>
+        <td style="font-weight:600; min-width:85px; max-width:100px;">${esc(e.event)}</td>
+        <td style="white-space:nowrap; font-size:10.5px;">${esc(e.date)}</td>
+        <td><span class="tier-badge" style="background:${TIER_META[e.tier].color}">${e.tier.replace("TIER ","T")}</span></td>
+        <td style="min-width:70px; max-width:88px;">${esc(e.host)}</td>
+        <td style="min-width:105px; max-width:140px;">${esc(e.note)}</td>
+        <td style="color:var(--muted); font-size:10px; min-width:68px; max-width:88px;">${esc(e.source)}</td>
+      </tr>
+    `).join("");
+  }
+
+  // ---------------- 04 Opportunities (accordion) ----------------
+  function renderOpportunities(){
+    const wrap = $("#opp-list");
+    wrap.innerHTML = OPP_MATRIX.map((o, i) => `
+      <div class="acc-item" data-idx="${i}">
+        <button class="acc-head" type="button">
+          <div>
+            <h4>${esc(o.event)}</h4>
+            <div class="acc-sub">${esc(o.property)}</div>
+          </div>
+          <div style="display:flex; align-items:center; gap:10px;">
+            <div style="display:flex; gap:4px;">
+              ${o.pods.map(p => `<span class="pill ${p==="Direct"?"pill-direct":p==="INC"?"pill-inc":"pill-digital"}">${p}</span>`).join("")}
+            </div>
+            <svg class="chev" width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+        </button>
+        <div class="acc-body">
+          <div class="acc-body-inner">
+            <div class="acc-field"><span class="fk">Digital component</span><p>${esc(o.digital)}</p></div>
+            <div class="acc-field"><span class="fk">Print component</span><p>${esc(o.print)}</p></div>
+            <div class="acc-field"><span class="fk">Paid media component</span><p>${esc(o.paid)}</p></div>
+            <div class="acc-field"><span class="fk">Client fit</span><p>${esc(o.clients)}</p></div>
+            <div class="acc-field" style="grid-column:1/-1;"><span class="fk">Editorial ask — what we need FROM editorial</span><p>${esc(o.ask)}</p></div>
+          </div>
+        </div>
+      </div>
+    `).join("");
+    $$(".acc-head", wrap).forEach(btn => {
+      btn.addEventListener("click", () => btn.closest(".acc-item").classList.toggle("open"));
+    });
+  }
+
+  // ---------------- 05 Clients ----------------
+  function renderClients(){
+    const mode = $("#cl-mode").value;
+    let rows = CLIENTS.filter(c => mode==="all" ? true : mode==="existing" ? c.existing : !c.existing);
+    $("#cl-grid").innerHTML = rows.map(c => `
+      <div class="client-card">
+        <div class="cc-top">
+          <div>
+            <h4>${esc(c.name)}</h4>
+            <div class="cc-cat">${esc(c.category)}</div>
+          </div>
+          <span class="status-dot ${c.existing?"existing":"new"}" title="${c.existing?"Existing relationship":"New business"}"></span>
+        </div>
+        <div class="cc-field"><span class="k">Relationship today</span><p>${esc(c.relationship)}</p></div>
+        <div class="cc-field"><span class="k">2027 opportunities</span><p>${esc(c.opportunities)}</p></div>
+        <div class="cc-field"><span class="k">Growth idea</span><p>${esc(c.growth)}</p></div>
+        <div class="cc-pods">${c.pods.map(p => `<span class="pill ${p==="Direct"?"pill-direct":p==="INC"?"pill-inc":"pill-digital"}">${p}</span>`).join("")}</div>
+      </div>
+    `).join("");
+  }
+
+  // ---------------- 06 Pipeline (Gantt) ----------------
+  function renderPipeline(){
+    const monthsHtml = MONTHS.map(m => `<div class="gm">${m.slice(0,3)}</div>`).join("");
+    $("#gantt-months").innerHTML = `<div></div>${monthsHtml}`;
+    const rows = PIPELINE.map(p => {
+      let barsHtml = "";
+      if (p.multiSpan){
+        barsHtml = p.multiSpan.map(idx => `<div class="gantt-dot" style="left:calc(${idx}/12*100% + 4px); background:var(--pod-digital);" title="${MONTHS[idx]}"></div>`).join("");
+      } else {
+        const span = p.endIdx - p.startIdx + 1;
+        const leftPct = (p.startIdx/12)*100;
+        const widthPct = (span/12)*100;
+        const color = p.status === "Needs a decision" ? "var(--red)" : p.pods.includes("Direct") && p.pods.includes("INC") && p.pods.includes("Digital") ? "var(--ink)" : "var(--pod-digital)";
+        const label = span >= 2 ? esc(p.channels) : "";
+        barsHtml = `<div class="gantt-bar" style="left:${leftPct}%; width:calc(${widthPct}% - 4px); background:${color};" title="${esc(p.channels)}">${label}</div>`;
+      }
+      const cells = MONTHS.map(()=>`<div class="gantt-cell"></div>`).join("");
+      return `
+        <div class="gantt-row">
+          <div class="gantt-label">${esc(p.name)}<span class="status-tag">${esc(p.status)}</span></div>
+          <div class="gantt-track">${cells}${barsHtml}</div>
+        </div>
+      `;
+    }).join("");
+    $("#gantt-rows").innerHTML = rows;
+
+    $("#pipeline-detail").innerHTML = PIPELINE.map(p => `
+      <div class="acc-field" style="margin-bottom:14px; padding-bottom:14px; border-bottom:1px solid var(--line-soft);">
+        <span class="fk" style="color:var(--ink); font-size:12.5px;">${esc(p.name)}</span>
+        <p style="margin-top:4px;">${esc(p.desc)}</p>
+      </div>
+    `).join("");
+  }
+
+  // ---------------- 07 Paid Media ----------------
+  function renderPaidMedia(){
+    $("#pm-grid").innerHTML = PAID_MEDIA.map(p => `
+      <div class="client-card">
+        <h4 style="margin-bottom:8px;">${esc(p.product)}</h4>
+        <div class="cc-field"><p>${esc(p.desc)}</p></div>
+        <div class="cc-field"><span class="k">Best paired with</span><p>${esc(p.pairs)}</p></div>
+        <div class="cc-field"><span class="k">Applicable pod(s)</span><p>${esc(p.pods)}</p></div>
+        <div class="cc-field"><span class="k">Client fit</span><p>${esc(p.clients)}</p></div>
+      </div>
+    `).join("");
+  }
+
+  // ---------------- 08 Print ----------------
+  function renderPrint(){
+    $("#print-tbody").innerHTML = PRINT_OPS.map(p => `
+      <tr>
+        <td style="font-weight:600;">${esc(p.group)}</td>
+        <td>${esc(p.type)}</td>
+        <td>${esc(p.event)}</td>
+        <td>${esc(p.month)}</td>
+        <td>${esc(p.lead)}</td>
+        <td>${esc(p.fit)}</td>
+      </tr>
+    `).join("");
+  }
+
+  // ---------------- 09 Digital Capacity ----------------
+  function renderCapacity(){
+    $("#cap-grid").innerHTML = DIGITAL_CAPACITY.map(c => `
+      <div class="cap-card ${c.conflict?"conflict":""}">
+        <div class="cap-month">${c.month} ${c.conflict?'<span class="conflict-flag">Conflict</span>':""}</div>
+        <div class="cap-slot"><span class="slot-k">Hub slot 1</span>${esc(c.slot1)}</div>
+        <div class="cap-slot"><span class="slot-k">Hub slot 2</span>${esc(c.slot2)}</div>
+        ${c.franchise !== "—" ? `<div class="cap-slot"><span class="slot-k">Franchise coverage</span>${esc(c.franchise)}</div>` : ""}
+      </div>
+    `).join("");
+    $("#cap-decision").textContent = CAPACITY_DECISION;
+  }
+
+  // ---------------- 10 Lead-time ----------------
+  function renderLeadTime(){
+    const maxLead = 7;
+    $("#lt-tbody").innerHTML = LEAD_TIME.map(l => {
+      const monthsNum = parseFloat((l.lead.match(/[\d.]+/)||["1"])[0]) || 1;
+      const pct = Math.min(100, (monthsNum/maxLead)*100);
+      return `
+      <tr>
+        <td style="font-weight:600; min-width:150px;">${esc(l.property)}</td>
+        <td style="white-space:nowrap;">${esc(l.inMarket)}</td>
+        <td style="white-space:nowrap;">${esc(l.startBy)}</td>
+        <td style="min-width:110px;">
+          <div class="score-bar-track" style="width:70px; display:inline-block; vertical-align:middle;"><div class="score-bar-fill" style="width:${pct}%; background:var(--red);"></div></div>
+          <span style="font-size:10px; margin-left:5px;">${esc(l.lead)}</span>
+        </td>
+        <td>${l.pods.map(p => `<span class="pill ${p==="Direct"?"pill-direct":p==="INC"?"pill-inc":"pill-digital"}">${p}</span>`).join(" ")}</td>
+      </tr>`;
+    }).join("");
+  }
+
+  // ---------------- 11 Scoring ----------------
+  let weights = Object.assign({}, SCORING_WEIGHTS_DEFAULT);
+  function renderWeightsPanel(){
+    const panel = $("#weights-panel");
+    const labels = {revenue:"Revenue potential", demand:"Client demand evidence", leadtime:"Sales lead-time feasibility", longevity:"Portfolio longevity", editorial:"Editorial/audience support"};
+    panel.innerHTML = Object.keys(labels).map(key => `
+      <div class="weight-ctrl">
+        <label>${labels[key]} <span class="wval" data-wval="${key}">${Math.round(weights[key]*100)}%</span></label>
+        <input type="range" min="0" max="60" step="5" value="${weights[key]*100}" data-weight="${key}">
+      </div>
+    `).join("") + `<div class="weight-total"><span>Total weight <strong id="wt-total" class="mono">100%</strong></span><button class="reset-btn" id="wt-reset" type="button">Reset to default</button></div>`;
+
+    $$("input[type=range]", panel).forEach(inp => {
+      inp.addEventListener("input", () => {
+        weights[inp.dataset.weight] = parseInt(inp.value,10)/100;
+        $(`[data-wval="${inp.dataset.weight}"]`).textContent = inp.value + "%";
+        updateWeightTotal();
+        renderScoring();
+      });
+    });
+    $("#wt-reset").addEventListener("click", () => {
+      weights = Object.assign({}, SCORING_WEIGHTS_DEFAULT);
+      renderWeightsPanel();
+      renderScoring();
+    });
+    updateWeightTotal();
+  }
+  function updateWeightTotal(){
+    const total = Object.values(weights).reduce((a,b)=>a+b,0);
+    const pct = Math.round(total*100);
+    const el = $("#wt-total");
+    if (!el) return;
+    el.textContent = pct + "%";
+    el.className = "mono" + (pct !== 100 ? " wt-warn" : "");
+  }
+  function tierForScore(s){
+    if (s >= 4.0) return "TIER 1";
+    if (s >= 2.8) return "TIER 2";
+    if (s >= 2.0) return "TIER 3";
+    return "TIER 4";
+  }
+  function renderScoring(){
+    const scored = SCORING.map(s => {
+      const score = s.revenue*weights.revenue + s.demand*weights.demand + s.leadtime*weights.leadtime + s.longevity*weights.longevity + s.editorial*weights.editorial;
+      return Object.assign({}, s, {score, tier: tierForScore(score)});
+    }).sort((a,b) => b.score - a.score);
+
+    $("#score-list").innerHTML = scored.map(s => `
+      <div class="score-row">
+        <div>
+          <div class="sr-name">${esc(s.name)}</div>
+          <div class="sr-rationale">${esc(s.rationale)}</div>
+        </div>
+        <div class="sr-score" style="color:${TIER_META[s.tier].color}">${s.score.toFixed(2)}</div>
+        <div>
+          <div class="score-bar-track"><div class="score-bar-fill" style="width:${(s.score/5)*100}%; background:${TIER_META[s.tier].color};"></div></div>
+          <div style="margin-top:5px;"><span class="tier-badge" style="background:${TIER_META[s.tier].color}">${s.tier}</span></div>
+        </div>
+      </div>
+    `).join("");
+  }
+
+  // ---------------- init ----------------
+  function init(){
+    initNav();
+    populateMonthlyFilters();
+    renderOverview();
+    renderMonthlyPlan();
+    renderCalendar();
+    renderEvents();
+    renderOpportunities();
+    renderClients();
+    renderPipeline();
+    renderPaidMedia();
+    renderPrint();
+    renderCapacity();
+    renderLeadTime();
+    renderWeightsPanel();
+    renderScoring();
+
+    ["mp-month","mp-pod","mp-channel"].forEach(id => $("#"+id).addEventListener("change", renderMonthlyPlan));
+    $("#mp-search").addEventListener("input", renderMonthlyPlan);
+    $("#mp-clear").addEventListener("click", clearMonthlyFilters);
+
+    ["ev-status","ev-tier"].forEach(id => $("#"+id).addEventListener("change", renderEvents));
+    $("#ev-search").addEventListener("input", renderEvents);
+
+    $("#cl-mode").addEventListener("change", renderClients);
+
+    showView("overview");
+  }
+
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init);
+  else init();
+})();
+
+</script>
+</body>
+</html>
