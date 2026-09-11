@@ -130,6 +130,11 @@ button{font-family:inherit;}
 @media (max-width:700px){ .view{padding:16px 14px 40px;} }
 
 .view-head{margin-bottom:16px; max-width:760px;}
+/* Monthly Plan's intro copy grew long (channel-mix + titles + confirmed/TBC explanation)
+   and was wrapping tightly at the shared 680px cap — this is a desktop-first tool with
+   room to spare, so give it the width instead of stacking it into a narrow column. */
+#view-monthly.view, #view-monthly .view-head{max-width:100%;}
+#view-monthly .view-head p{max-width:1180px;}
 .eyebrow{
   font-size:10px; font-weight:600; letter-spacing:.13em; text-transform:uppercase; color:var(--red);
   margin-bottom:6px; display:block;
@@ -391,13 +396,12 @@ table.datatable tbody tr:last-child td{border-bottom:none;}
       <button data-view="calendar"><span class="idx">02</span>Calendar</button>
       <button data-view="events"><span class="idx">03</span>Events</button>
       <button data-view="opportunities"><span class="idx">04</span>Opportunities</button>
-      <button data-view="clients"><span class="idx">05</span>Clients</button>
-      <button data-view="pipeline"><span class="idx">06</span>Pipeline</button>
-      <button data-view="paidmedia"><span class="idx">07</span>Paid Media</button>
-      <button data-view="print"><span class="idx">08</span>Print</button>
-      <button data-view="capacity"><span class="idx">09</span>Digital Capacity</button>
-      <button data-view="leadtime"><span class="idx">10</span>Lead-Time</button>
-      <button data-view="scoring"><span class="idx">11</span>Scoring</button>
+      <button data-view="pipeline"><span class="idx">05</span>Pipeline</button>
+      <button data-view="paidmedia"><span class="idx">06</span>Paid Media</button>
+      <button data-view="print"><span class="idx">07</span>Print</button>
+      <button data-view="capacity"><span class="idx">08</span>Digital Capacity</button>
+      <button data-view="leadtime"><span class="idx">09</span>Lead-Time</button>
+      <button data-view="scoring"><span class="idx">10</span>Scoring</button>
     </div>
     <div class="rail-foot">2027 SA events, fact-checked Sep 2026. Reconfirm dates marked TBC before client-facing use.</div>
   </nav>
@@ -443,7 +447,7 @@ table.datatable tbody tr:last-child td{border-bottom:none;}
       </div>
 
       <div class="section-note">
-        Paid media (social, programmatic/DV360, Google Ads) is a cross-cutting layer any pod can attach to a deal — it has no dedicated owner today. See <strong>07 Paid Media</strong> for that product menu and <strong>09 Digital Capacity</strong> for how Cricket World Cup and Rugby World Cup — both confirmed priority hubs running the same Oct–Nov window — share IOL hub capacity. Every pod can also sell into The Sandton Times — it isn't broken out as its own line here, but it's available as an add-on title alongside any of the titles below.
+        Paid media (social, programmatic/DV360, Google Ads) is a cross-cutting layer any pod can attach to a deal — it has no dedicated owner today. See <strong>06 Paid Media</strong> for that product menu and <strong>08 Digital Capacity</strong> for how Cricket World Cup and Rugby World Cup — both confirmed priority hubs running the same Oct–Nov window — share IOL hub capacity. Every pod can also sell into The Sandton Times — it isn't broken out as its own line here, but it's available as an add-on title alongside any of the titles below.
       </div>
     </section>
 
@@ -498,7 +502,7 @@ table.datatable tbody tr:last-child td{border-bottom:none;}
       <div class="view-head">
         <span class="eyebrow">02 · For management</span>
         <h1>Executive Commercial Calendar</h1>
-        <p>One page: headline moment(s) and hero client target, per month. Tiers vary line by line now that months stack multiple moments — see 03 Events for each one's tier.</p>
+        <p>One page: every headline commercial moment, per month, with the sales pod(s) selling it — pulled straight from the Monthly Plan (01), so nothing can go missing here that's already being sold. Tiers vary line by line now that months stack multiple moments — see 03 Events for each one's tier.</p>
       </div>
 
       <div class="decision-box" style="margin-top:0; margin-bottom:14px;">
@@ -508,7 +512,7 @@ table.datatable tbody tr:last-child td{border-bottom:none;}
 
       <div class="table-wrap">
         <table class="datatable">
-          <thead><tr><th>Month</th><th>Headline commercial moment(s)</th><th>Hero client target</th></tr></thead>
+          <thead><tr><th style="width:110px;">Month</th><th>Headline commercial moment(s)</th></tr></thead>
           <tbody id="cal-tbody"></tbody>
         </table>
       </div>
@@ -548,7 +552,7 @@ table.datatable tbody tr:last-child td{border-bottom:none;}
       </div>
       <div class="table-wrap">
         <table class="datatable">
-          <thead><tr><th>Event</th><th>2027 date(s)</th><th>Tier</th><th>Host / location</th><th>Note</th><th>Source</th></tr></thead>
+          <thead><tr><th>Event</th><th>2027 date(s)</th><th>Tier</th><th>Host / location</th><th>Note</th></tr></thead>
           <tbody id="ev-tbody"></tbody>
         </table>
       </div>
@@ -564,30 +568,10 @@ table.datatable tbody tr:last-child td{border-bottom:none;}
       <div id="opp-list"></div>
     </section>
 
-    <!-- 05 CLIENTS -->
-    <section id="view-clients" class="view">
-      <div class="view-head">
-        <span class="eyebrow">05 · Who pays for this</span>
-        <h1>Client Account Map</h1>
-        <p>Named existing accounts mapped to 2027 whitespace, plus new-business categories with no relationship yet.</p>
-      </div>
-      <div class="filterbar">
-        <div class="fgroup">
-          <label for="cl-mode">Show</label>
-          <select id="cl-mode">
-            <option value="all">All accounts</option>
-            <option value="existing">Existing only</option>
-            <option value="new">New business only</option>
-          </select>
-        </div>
-      </div>
-      <div class="client-grid" id="cl-grid"></div>
-    </section>
-
-    <!-- 06 PIPELINE -->
+    <!-- 05 PIPELINE -->
     <section id="view-pipeline" class="view">
       <div class="view-head">
-        <span class="eyebrow">06 · What actually carries revenue</span>
+        <span class="eyebrow">05 · What actually carries revenue</span>
         <h1>Commercial Property Pipeline</h1>
         <p>The longer-running properties across the year — these give reps something to sell every month, not just on the day.</p>
       </div>
@@ -595,26 +579,24 @@ table.datatable tbody tr:last-child td{border-bottom:none;}
         <div class="gantt-months" id="gantt-months"></div>
         <div id="gantt-rows"></div>
       </div>
-      <h3 style="margin:26px 0 12px; font-size:16px;">Property detail</h3>
-      <div id="pipeline-detail"></div>
     </section>
 
-    <!-- 07 PAID MEDIA -->
+    <!-- 06 PAID MEDIA -->
     <section id="view-paidmedia" class="view">
       <div class="view-head">
-        <span class="eyebrow">07 · Cross-cutting layer</span>
+        <span class="eyebrow">06 · Cross-cutting layer</span>
         <h1>Paid Media Menu</h1>
         <p>Paid media is social media, programmatic (DV360) and Google Ads — the three channels that sit outside any one title's own inventory. No pod owns this proactively today — every pod can attach it to a deal. Retail-media placements, newsletter takeovers, SEO-led content and video amplification aren't paid media — they're placements on a specific platform's own inventory, so they sit under that platform/title instead (Print, Digital Capacity, or the relevant campaign card in Monthly Plan).</p>
       </div>
       <div class="client-grid" id="pm-grid"></div>
     </section>
 
-    <!-- 08 PRINT -->
+    <!-- 07 PRINT -->
     <section id="view-print" class="view">
       <div class="view-head">
-        <span class="eyebrow">08 · Detail view for Direct &amp; INC</span>
+        <span class="eyebrow">07 · Detail view for Direct &amp; INC</span>
         <h1>Print Opportunities</h1>
-        <p>Supplements, wraps, advertorial and special editions by title, tied to the 2027 calendar.</p>
+        <p>Supplements, wraps, advertorial and special editions by title, tied to the 2027 calendar. Sorted chronologically by month.</p>
       </div>
       <div class="table-wrap">
         <table class="datatable">
@@ -624,10 +606,10 @@ table.datatable tbody tr:last-child td{border-bottom:none;}
       </div>
     </section>
 
-    <!-- 09 DIGITAL CAPACITY -->
+    <!-- 08 DIGITAL CAPACITY -->
     <section id="view-capacity" class="view">
       <div class="view-head">
-        <span class="eyebrow">09 · Finite resource, not editorial ownership</span>
+        <span class="eyebrow">08 · Finite resource, not editorial ownership</span>
         <h1>Digital &amp; IOL Capacity</h1>
         <p>Two concurrent IOL hub slots, held as a hard discipline. October–November 2027 is the year's real test — Cricket World Cup and Rugby World Cup both run live at once. How the slots are sequenced is set out below.</p>
       </div>
@@ -638,10 +620,10 @@ table.datatable tbody tr:last-child td{border-bottom:none;}
       </div>
     </section>
 
-    <!-- 10 LEAD-TIME -->
+    <!-- 09 LEAD-TIME -->
     <section id="view-leadtime" class="view">
       <div class="view-head">
-        <span class="eyebrow">10 · When to start selling</span>
+        <span class="eyebrow">09 · When to start selling</span>
         <h1>Sales Lead-Time Calendar</h1>
         <p>When each pod needs to start selling a property to hit its in-market date.</p>
       </div>
@@ -653,10 +635,10 @@ table.datatable tbody tr:last-child td{border-bottom:none;}
       </div>
     </section>
 
-    <!-- 11 SCORING -->
+    <!-- 10 SCORING -->
     <section id="view-scoring" class="view">
       <div class="view-head">
-        <span class="eyebrow">11 · Revenue-weighted, not audience-weighted</span>
+        <span class="eyebrow">10 · Revenue-weighted, not audience-weighted</span>
         <h1>Commercial Scoring Model</h1>
         <p>Adjust the weights below — the scores and ranking recalculate live.</p>
       </div>
@@ -1478,11 +1460,13 @@ const SCORING = [
       if (!map.has(name)) map.set(name, { name, tier, rows: [] });
       map.get(name).rows.push(r);
     });
+    const podOrder = Object.keys(POD_META);
     const arr = Array.from(map.values()).map(c => {
       const idxs = c.rows.map(r => MONTHS.indexOf(r.month));
       const pods = new Set(c.rows.map(r => r.pod));
+      const podsOrdered = podOrder.filter(p => pods.has(p));
       c.rows.sort((a,b) => MONTHS.indexOf(a.month) - MONTHS.indexOf(b.month));
-      return Object.assign(c, { minIdx: Math.min(...idxs), maxIdx: Math.max(...idxs), podCount: pods.size, total: c.rows.length, eventStatus: eventStatusForCampaign(c.name) });
+      return Object.assign(c, { minIdx: Math.min(...idxs), maxIdx: Math.max(...idxs), pods: podsOrdered, podCount: pods.size, total: c.rows.length, eventStatus: eventStatusForCampaign(c.name) });
     });
     arr.sort((a,b) => a.minIdx - b.minIdx || a.maxIdx - b.maxIdx);
     return arr;
@@ -1578,36 +1562,46 @@ const SCORING = [
   }
 
   // ---------------- 02 Calendar ----------------
-  const EXEC_CAL = [
-    ["January","Back to School · Comrades Centenary build-up begins · Matric Results & Top Achievers (~12–13 Jan est.) · Tweede Nuwe Jaar/Kaapse Klopse (TBC)","Retail/education; Insurance/medical aid; schools/universities/financial institutions","TIER 1"],
-    ["February","Valentine's Day (tactical) · National Budget Speech · Ramadan begins (~8 Feb est.)","Standard Bank","TIER 4"],
-    ["March","Cape Town Jazz Festival (now month-long) · Easter (26–29 Mar) · Cape Town Cycle Tour (TBC) · KKNK (TBC)","BMW/Condé Nast lane, travel/tourism","TIER 2"],
-    ["April","Two Oceans Marathon · Freedom Day · WEF Africa / Special Meeting SA (month confirmed, dates TBC) · AfrikaBurn (26 Apr–2 May)","Checkers/Sixty60; Government/GCIS/investor lane","TIER 1"],
-    ["May","Sanlam Cape Town Marathon — new May date, now a World Marathon Major","Sanlam-adjacent categories, travel","TIER 2"],
-    ["June","Comrades Centenary (13 June) · Youth Month","National insurance/medical aid/banking sponsor","TIER 1"],
-    ["July","Durban July · Mandela Day · Tax season","Fashion/beauty/beverage","TIER 2"],
-    ["August","Women's Month · Cricket World Cup pre-build · Rugby World Cup pre-build","Standard Bank; Telco/broadcast; SARU/Checkers-Sixty60","TIER 1"],
-    ["September","Heritage Month · Cricket World Cup opens (4 Oct) · Rugby World Cup opens in Australia (1 Oct) — both confirmed priority hubs · Tourism Month/S'hot Left · Spring Reset begins · Condé Nast Hair & Beauty Awards/GQ Best Dressed/H&G DOTY","Mochachos; National telco/banking/QSR; SARU/Checkers-Sixty60; SA Tourism/Airlink/FlySafair; BMW/Condé Nast lane","TIER 1"],
-    ["October","Cricket World Cup live · Rugby World Cup live (Australia) · Black Friday pre-sell","National telco/banking/QSR; SARU/Checkers-Sixty60","TIER 1"],
-    ["November","Rugby World Cup Final (13 Nov) · Cricket World Cup Final (21 Nov) · Black Friday (26 Nov)","SARU/Checkers-Sixty60; National telco/banking","TIER 1"],
-    ["December","Festive Season","National retail/FMCG/travel","TIER 2"],
-  ];
+  // Built directly from the same CAMPAIGN_INDEX the Monthly Plan uses (rather than a
+  // separately hand-maintained list) so every property on 01 is guaranteed to show up
+  // here too — this is management's summary of the Monthly Plan, so the two can't be
+  // allowed to drift the way a hand-typed list did (e.g. Raging Bull Awards was missing
+  // until this was rebuilt to derive from the data instead of being retyped by hand).
+  // Each campaign is listed under every month it actually has a Monthly Plan line item
+  // in, not just its first month, so a multi-month property like Cricket World Cup shows
+  // up in every month it's genuinely active — pre-build, launch, live, and Final.
   function renderCalendar(){
     $("#date-confidence-calendar").textContent = dateConfidenceLine();
     const tbody = $("#cal-tbody");
+    const byMonth = MONTHS.map(() => []);
+    CAMPAIGN_INDEX.forEach(c => {
+      const monthsPresent = new Set(c.rows.map(r => r.month));
+      monthsPresent.forEach(m => byMonth[MONTHS.indexOf(m)].push(c));
+    });
     // Each headline moment stacks on its own line instead of running together
     // inline with " · " separators — much easier to scan for busy months.
     // No single tier badge here any more: once a month stacks several moments of
     // different tiers, one row-level badge was misleading (e.g. Valentine's Day
     // vs National Budget Speech in February) — per-event tier lives on 03 Events.
-    const momentLines = (moment) => moment.split(/\s*·\s*/).map(m => esc(m)).join("<br>");
-    tbody.innerHTML = EXEC_CAL.map(([m,moment,client]) => `
+    // Each moment's sales pod(s) are pushed to the right of its own line (rather than
+    // a separate table column, which would risk drifting out of alignment once lines
+    // wrap differently) — this also puts the empty space on the right of a wide,
+    // mostly-text column to use.
+    tbody.innerHTML = MONTHS.map((m, idx) => {
+      const camps = byMonth[idx].slice().sort((a,b) => TIER_ORDER.indexOf(a.tier) - TIER_ORDER.indexOf(b.tier) || a.name.localeCompare(b.name));
+      const lines = camps.map(c => `
+        <div style="display:flex; justify-content:space-between; align-items:center; gap:14px; padding:3px 0;">
+          <span>${esc(c.name)}</span>
+          <span style="display:flex; gap:4px; flex-wrap:wrap; justify-content:flex-end;">${c.pods.map(p => podPill(p)).join("")}</span>
+        </div>
+      `).join("") || `<span style="color:var(--muted);">—</span>`;
+      return `
       <tr>
         <td style="font-weight:600; vertical-align:top;">${m}</td>
-        <td style="line-height:1.6;">${momentLines(moment)}</td>
-        <td style="vertical-align:top;">${esc(client)}</td>
+        <td>${lines}</td>
       </tr>
-    `).join("");
+    `;
+    }).join("");
   }
 
   // ---------------- 03 Events ----------------
@@ -1622,18 +1616,17 @@ const SCORING = [
         if (status === "tbc" && isConfirmed) return false;
       }
       if (tier !== "all" && e.tier !== tier) return false;
-      if (q && !(e.event+" "+e.note+" "+e.host).toLowerCase().includes(q)) return false;
+      if (q && !(e.event+" "+e.note+" "+e.host+" "+e.source).toLowerCase().includes(q)) return false;
       return true;
     });
     $("#ev-count").textContent = rows.length + (rows.length===1?" event":" events");
     $("#ev-tbody").innerHTML = rows.map(e => `
       <tr>
-        <td style="font-weight:600; min-width:85px; max-width:100px;">${esc(e.event)}</td>
-        <td style="font-size:10.5px; min-width:76px; max-width:96px; white-space:normal;">${esc(e.date)}</td>
-        <td><span class="tier-badge" style="background:${TIER_META[e.tier].color}">${e.tier.replace("TIER ","T")}</span></td>
-        <td style="min-width:78px; max-width:100px;">${esc(e.host)}</td>
-        <td style="min-width:120px; max-width:165px;">${esc(e.note)}</td>
-        <td style="color:var(--muted); font-size:10px; min-width:74px; max-width:100px;">${esc(e.source)}</td>
+        <td style="font-weight:600; min-width:150px;">${esc(e.event)}</td>
+        <td style="font-size:10.5px; min-width:120px; white-space:normal;">${esc(e.date)}</td>
+        <td style="white-space:nowrap;"><span class="tier-badge" style="background:${TIER_META[e.tier].color}">${e.tier.replace("TIER ","T")}</span></td>
+        <td style="min-width:160px;">${esc(e.host)}</td>
+        <td style="min-width:220px;">${esc(e.note)}</td>
       </tr>
     `).join("");
   }
@@ -1671,28 +1664,7 @@ const SCORING = [
     });
   }
 
-  // ---------------- 05 Clients ----------------
-  function renderClients(){
-    const mode = $("#cl-mode").value;
-    let rows = CLIENTS.filter(c => mode==="all" ? true : mode==="existing" ? c.existing : !c.existing);
-    $("#cl-grid").innerHTML = rows.map(c => `
-      <div class="client-card">
-        <div class="cc-top">
-          <div>
-            <h4>${esc(c.name)}</h4>
-            <div class="cc-cat">${esc(c.category)}</div>
-          </div>
-          <span class="status-dot ${c.existing?"existing":"new"}" title="${c.existing?"Existing relationship":"New business"}"></span>
-        </div>
-        <div class="cc-field"><span class="k">Relationship today</span><p>${esc(c.relationship)}</p></div>
-        <div class="cc-field"><span class="k">2027 opportunities</span><p>${esc(c.opportunities)}</p></div>
-        <div class="cc-field"><span class="k">Growth idea</span><p>${esc(c.growth)}</p></div>
-        <div class="cc-pods">${c.pods.map(p => podPill(p)).join("")}</div>
-      </div>
-    `).join("");
-  }
-
-  // ---------------- 06 Pipeline (Gantt) ----------------
+  // ---------------- 05 Pipeline (Gantt) ----------------
   function renderPipeline(){
     const monthsHtml = MONTHS.map(m => `<div class="gm">${m.slice(0,3)}</div>`).join("");
     $("#gantt-months").innerHTML = `<div></div>${monthsHtml}`;
@@ -1717,16 +1689,9 @@ const SCORING = [
       `;
     }).join("");
     $("#gantt-rows").innerHTML = rows;
-
-    $("#pipeline-detail").innerHTML = PIPELINE.map(p => `
-      <div class="acc-field" style="margin-bottom:14px; padding-bottom:14px; border-bottom:1px solid var(--line-soft);">
-        <span class="fk" style="color:var(--ink); font-size:12.5px;">${esc(p.name)}</span>
-        <p style="margin-top:4px;">${esc(p.desc)}</p>
-      </div>
-    `).join("");
   }
 
-  // ---------------- 07 Paid Media ----------------
+  // ---------------- 06 Paid Media ----------------
   function renderPaidMedia(){
     $("#pm-grid").innerHTML = PAID_MEDIA.map(p => `
       <div class="client-card">
@@ -1739,9 +1704,22 @@ const SCORING = [
     `).join("");
   }
 
-  // ---------------- 08 Print ----------------
+  // ---------------- 07 Print ----------------
+  // Sorted chronologically (by the earliest month mentioned in each row's Month field,
+  // which is sometimes a single month and sometimes a range/pair like "Sep & Nov" or
+  // "Jan – Jun" — always written in calendar order in the data), then alphabetically by
+  // event name within the same month so the list is stable and easy to scan.
+  function firstMonthIndex(monthStr){
+    let best = 99;
+    MONTHS.forEach((full, i) => {
+      const abbr = full.slice(0,3);
+      if (monthStr.includes(full) || monthStr.includes(abbr)) best = Math.min(best, i);
+    });
+    return best;
+  }
   function renderPrint(){
-    $("#print-tbody").innerHTML = PRINT_OPS.map(p => `
+    const sorted = PRINT_OPS.slice().sort((a,b) => firstMonthIndex(a.month) - firstMonthIndex(b.month) || a.event.localeCompare(b.event));
+    $("#print-tbody").innerHTML = sorted.map(p => `
       <tr>
         <td style="font-weight:600;">${esc(p.event)}</td>
         <td>${esc(p.group)}</td>
@@ -1753,7 +1731,7 @@ const SCORING = [
     `).join("");
   }
 
-  // ---------------- 09 Digital Capacity ----------------
+  // ---------------- 08 Digital Capacity ----------------
   function renderCapacity(){
     $("#cap-grid").innerHTML = DIGITAL_CAPACITY.map(c => `
       <div class="cap-card ${c.conflict?"conflict":""}">
@@ -1766,7 +1744,7 @@ const SCORING = [
     $("#cap-decision").textContent = CAPACITY_DECISION;
   }
 
-  // ---------------- 10 Lead-time ----------------
+  // ---------------- 09 Lead-time ----------------
   function renderLeadTime(){
     const maxLead = 7;
     const sorted = [...LEAD_TIME].sort((a,b) => monthIndexFromText(a.inMarket) - monthIndexFromText(b.inMarket));
@@ -1787,7 +1765,7 @@ const SCORING = [
     }).join("");
   }
 
-  // ---------------- 11 Scoring ----------------
+  // ---------------- 10 Scoring ----------------
   let weights = Object.assign({}, SCORING_WEIGHTS_DEFAULT);
   function renderWeightsPanel(){
     const panel = $("#weights-panel");
@@ -1858,7 +1836,6 @@ const SCORING = [
     renderCalendar();
     renderEvents();
     renderOpportunities();
-    renderClients();
     renderPipeline();
     renderPaidMedia();
     renderPrint();
@@ -1873,8 +1850,6 @@ const SCORING = [
 
     ["ev-status","ev-tier"].forEach(id => $("#"+id).addEventListener("change", renderEvents));
     $("#ev-search").addEventListener("input", renderEvents);
-
-    $("#cl-mode").addEventListener("change", renderClients);
 
     showView("overview");
   }
